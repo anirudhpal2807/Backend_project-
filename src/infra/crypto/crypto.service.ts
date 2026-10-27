@@ -52,6 +52,18 @@ export class CryptoService {
     return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
   }
 
+  async encrypt(plaintext: string): Promise<string> {
+    return this.encryptField(plaintext);
+  }
+
+  async decrypt(serializedEnvelopeOrObject: string | EncryptedEnvelope): Promise<string> {
+    const serialized =
+      typeof serializedEnvelopeOrObject === 'string'
+        ? serializedEnvelopeOrObject
+        : JSON.stringify(serializedEnvelopeOrObject);
+    return this.decryptField(serialized);
+  }
+
   hashSha256(data: string): string {
     return crypto.createHash('sha256').update(data).digest('hex');
   }
