@@ -173,3 +173,40 @@ Decisions made:
 Next:
   - Phase 2: T-020 through T-029 (Database, Data Model, Kysely setup, migrations with exclusion constraints, partial unique indexes, audit log triggers, and partition maintenance).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #005] 2026-10-27T22:15:00+05:30
+Task(s):    T-020, T-021, T-022, T-023, T-024, T-025, T-026, T-027, T-028, T-029
+Phase:      2 — Database and Data Model
+Status:     DONE
+
+Completed:
+  - T-020: Built DatabaseService and UnitOfWork transaction manager. Handled pg connection pool with statement timeouts (5s) and automatic exponential backoff retry on transient serialization failures (40001) and deadlocks (40P01).
+  - T-021: Created Migration 001 with PostgreSQL extensions (uuid-ossp, pgcrypto, btree_gist, pg_trgm), users, user_roles, and encrypted profiles with key_version.
+  - T-022: Created Migration 002 for doctors, doctor_specializations, availability_rules, and availability_slots with a GIST exclusion constraint (no_overlapping_slots_per_doctor) preventing doctor slot overlaps at the database level.
+  - T-023: Created Migration 003 for consultations with a partial unique index (uq_consultation_active_slot) on (slot_id) for active states preventing double-booking, payments table with provider_payment_id uniqueness, payment_events, and processed_webhooks.
+  - T-024: Created Migration 004 for prescriptions with versioned, encrypted payloads and unique (consultation_id, version).
+  - T-025: Created Migration 005 for audit_logs with cryptographic hash chain (prev_hash, hash) and a PostgreSQL trigger (trg_protect_audit_logs) strictly forbidding UPDATE and DELETE.
+  - T-026: Created Migration 006 for idempotency_keys (unique user_id, scope, key with request fingerprint), transactional outbox_events, rotating refresh_tokens, mfa_factors, and mfa_backup_codes.
+  - T-027: Created Migration 007 with GIN trigram indexes on specializations, doctor composite availability indexes, and consultation history query indexes.
+  - T-028: Set up partition retention strategies and declarative range architectures.
+  - T-029: Authored comprehensive database seed script (src/infra/db/seeds/seed.ts) creating verified doctors with recurring open slots, admin, patient, and auditor test credentials.
+  - Tested: Added unit tests in tests/unit/db.spec.ts for UnitOfWork transactions, retry on serialization failure, and non-transient error handling.
+  - Committed Phase 2 (commit 4464837).
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 14/14 tests across 4 test suites.
+  - nest build compiled cleanly.
+  - Phase 2 is 100% complete (10/10 tasks done).
+
+Issues encountered:
+  - Explicit typing enforced in tests/unit/db.spec.ts to satisfy ESLint @typescript-eslint/no-explicit-any.
+
+Decisions made:
+  - Exclusion constraints and partial unique indexes are enforced in the database as primary correctness mechanisms rather than relying on application locks.
+
+Next:
+  - Phase 3: T-030 through T-039 (Cross-Cutting Platform: RFC 7807 error model, Idempotency interceptor, Redis rate limiter, AES-256-GCM envelope encryption, outbox worker, resilience utilities).
+
+

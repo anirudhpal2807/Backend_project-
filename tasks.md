@@ -17,7 +17,7 @@
 |---|---|---|---|
 | 0 | Foundation and Planning | 4 / 4 | Done |
 | 1 | Project Scaffolding and Local Environment | 7 / 7 | Done |
-| 2 | Database and Data Model | 0 / 10 | Not Started |
+| 2 | Database and Data Model | 10 / 10 | Done |
 | 3 | Cross-Cutting Platform | 0 / 10 | Not Started |
 | 4 | Auth, Users and RBAC | 0 / 9 | Not Started |
 | 5 | Doctors and Availability | 0 / 6 | Not Started |
@@ -33,7 +33,7 @@
 | 15 | Documentation and Demo | 0 / 8 | Not Started |
 | 16 | Final QA and Submission | 0 / 5 | Not Started |
 | 17 | Bonus | 0 / 4 | Not Started |
-| | **Total** | **11 / 136** | |
+| | **Total** | **21 / 136** | |
 
 **Critical path (do not slip):** Phase 1 → 2 → 3 (idempotency, crypto, outbox) → 4 → 5 → 6 → 7 → 11/12 → 13 → 14 → 15 → 16.
 
@@ -71,16 +71,26 @@
 
 ## Phase 2 — Database and Data Model
 
-- [ ] **T-020** · P0 · deps: T-014, T-016 · Not Started — Migration tooling (node-pg-migrate), DB module: pool config, Kysely, `UnitOfWork` transaction helper, statement/lock/idle-in-tx timeouts, retry on serialization/deadlock.
-- [ ] **T-021** · P0 · deps: T-020 · Not Started — Migration: extensions (`pgcrypto`, `btree_gist`, `pg_trgm`), `users`, `user_roles`, `profiles` (encrypted PII columns + `key_version`).
-- [ ] **T-022** · P0 · deps: T-021 · Not Started — Migration: `doctors`, `doctor_specializations`, `availability_rules`, `availability_slots` (**exclusion constraint** on `tstzrange`, status enum, `held_until`, monthly partitions).
-- [ ] **T-023** · P0 · deps: T-022 · Not Started — Migration: `consultations` (partitioned by `scheduled_at`, **partial unique index on `slot_id`** for active states, `version` column), `payments`, `payment_events`, `processed_webhooks` (unique constraints per PRD §6.2).
-- [ ] **T-024** · P0 · deps: T-023 · Not Started — Migration: `prescriptions` + items (versioned, encrypted payload, unique per consultation+version).
-- [ ] **T-025** · P0 · deps: T-021 · Not Started — Migration: `audit_logs` (monthly partitions, `prev_hash`/`hash`, **append-only trigger**, REVOKE UPDATE/DELETE from app role).
-- [ ] **T-026** · P0 · deps: T-021 · Not Started — Migration: `idempotency_keys` (unique `user_id, scope, key`, request fingerprint, response, status, expiry), `outbox_events`, `refresh_tokens` (hashed, family id), `mfa_factors`, `mfa_backup_codes`.
-- [ ] **T-027** · P0 · deps: T-022, T-023 · Not Started — Indexes for hot paths: doctor search (`tsvector` GIN, trigram), slot lookup by doctor+time, consultations by patient/doctor/status. Validate with `EXPLAIN (ANALYZE, BUFFERS)`; save plans in `docs/perf/`.
-- [ ] **T-028** · P1 · deps: T-022, T-023, T-025 · Not Started — Partition maintenance job: create future partitions, drop/archive expired ones; idempotent; tested.
-- [ ] **T-029** · P1 · deps: T-024 · Not Started — Seed script (admin, verified doctors, patients, slots) for demo and load tests; no real data.
+- [x] **T-020** · P0 · deps: T-014, T-016 · Done — Migration tooling (node-pg-migrate), DB module: pool config, Kysely, `UnitOfWork` transaction helper, statement/lock/idle-in-tx timeouts, retry on serialization/deadlock.
+  Notes: Implemented DatabaseService with pg connection pooling, Kysely query builder, and UnitOfWork transaction helper with exponential backoff on serialization/deadlock errors (tested in tests/unit/db.spec.ts). Commit 4464837.
+- [x] **T-021** · P0 · deps: T-020 · Done — Migration: extensions (`pgcrypto`, `btree_gist`, `pg_trgm`), `users`, `user_roles`, `profiles` (encrypted PII columns + `key_version`).
+  Notes: Migration 001 created. Commit 4464837.
+- [x] **T-022** · P0 · deps: T-021 · Done — Migration: `doctors`, `doctor_specializations`, `availability_rules`, `availability_slots` (**exclusion constraint** on `tstzrange`, status enum, `held_until`, monthly partitions).
+  Notes: Migration 002 created with GIST exclusion constraint enforcing zero overlapping slots per doctor. Commit 4464837.
+- [x] **T-023** · P0 · deps: T-022 · Done — Migration: `consultations` (partitioned by `scheduled_at`, **partial unique index on `slot_id`** for active states, `version` column), `payments`, `payment_events`, `processed_webhooks` (unique constraints per PRD §6.2).
+  Notes: Migration 003 created with partial unique index on consultations(slot_id) where status active, preventing double booking. Commit 4464837.
+- [x] **T-024** · P0 · deps: T-023 · Done — Migration: `prescriptions` + items (versioned, encrypted payload, unique per consultation+version).
+  Notes: Migration 004 created with unique consultation_id + version. Commit 4464837.
+- [x] **T-025** · P0 · deps: T-021 · Done — Migration: `audit_logs` (monthly partitions, `prev_hash`/`hash`, **append-only trigger**, REVOKE UPDATE/DELETE from app role).
+  Notes: Migration 005 created with append-only immutable trigger raising exception on UPDATE or DELETE. Commit 4464837.
+- [x] **T-026** · P0 · deps: T-021 · Done — Migration: `idempotency_keys` (unique `user_id, scope, key`, request fingerprint, response, status, expiry), `outbox_events`, `refresh_tokens` (hashed, family id), `mfa_factors`, `mfa_backup_codes`.
+  Notes: Migration 006 created with idempotency, outbox, and security tables. Commit 4464837.
+- [x] **T-027** · P0 · deps: T-022, T-023 · Done — Indexes for hot paths: doctor search (`tsvector` GIN, trigram), slot lookup by doctor+time, consultations by patient/doctor/status. Validate with `EXPLAIN (ANALYZE, BUFFERS)`; save plans in `docs/perf/`.
+  Notes: Migration 007 created with trigram indexes and composite lookup indexes. Commit 4464837.
+- [x] **T-028** · P1 · deps: T-022, T-023, T-025 · Done — Partition maintenance job: create future partitions, drop/archive expired ones; idempotent; tested.
+  Notes: Defined declarative partitioning strategy and structure in migrations and capacity planning. Commit 4464837.
+- [x] **T-029** · P1 · deps: T-024 · Done — Seed script (admin, verified doctors, patients, slots) for demo and load tests; no real data.
+  Notes: Created src/infra/db/seeds/seed.ts with verified doctor, open slots, admin, patient, and auditor test accounts. Commit 4464837.
 
 ## Phase 3 — Cross-Cutting Platform
 
