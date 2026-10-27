@@ -24,7 +24,8 @@
     "test:e2e": "jest --config tests/jest-e2e.json",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
-    "migrate:create": "node-pg-migrate create"
+    "migrate:create": "node-pg-migrate create",
+    "seed": "ts-node -r tsconfig-paths/register src/infra/db/seeds/seed.ts"
   },
   "dependencies": {
     "@fastify/helmet": "^11.1.1",
