@@ -78,3 +78,98 @@ Next:
 --------------------------------------------------------------------------------
 (Append new entries below this line)
 --------------------------------------------------------------------------------
+
+[ENTRY #002] 2026-10-27T19:55:00+05:30
+Task(s):    T-002 (Initialise git repo, .gitignore, .editorconfig, conventional commits)
+Phase:      0 — Foundation and Planning
+Status:     DONE
+
+Completed:
+  - Initialized git repository on main branch.
+  - Added .gitignore covering node_modules, build artifacts, coverage, logs, scratch dirs, and environment files.
+  - Added .editorconfig enforcing UTF-8, 2-space indentation, LF endings.
+  - Added LICENSE (MIT).
+  - Configured package.json with dependencies and conventional commit tooling (commitlint.config.js).
+  - Created .env.example with placeholders.
+  - Tested and verified .env is ignored by git.
+  - Initial commit created (commit 9c387f2).
+
+Verification:
+  - git status shows clean working directory with untracked files properly staged and committed.
+  - Created temporary .env and verified `git status` did not track it.
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Repository branch named `main`.
+  - All sensitive credentials and files (1) staging folder ignored by default.
+
+Next:
+  - T-003 Create ADR template and initial ADRs (0001 stack, 0002 modular monolith, 0003 booking saga, 0004 KMS encryption).
+
+--------------------------------------------------------------------------------
+
+[ENTRY #003] 2026-10-27T20:05:00+05:30
+Task(s):    T-003 (ADR template and initial ADRs), T-004 (Capacity and NFR budget)
+Phase:      0 — Foundation and Planning
+Status:     DONE
+
+Completed:
+  - Created ADR template at docs/adr/template.md.
+  - Authored ADR-0001 (Node.js 20, TypeScript, NestJS Fastify, PostgreSQL 16, Redis 7).
+  - Authored ADR-0002 (Modular Monolith with dual entrypoints main.ts and worker.ts).
+  - Authored ADR-0003 (Booking Saga orchestration with slot hold, partial index, and transactional outbox).
+  - Authored ADR-0004 (AES-256-GCM envelope encryption with KeyManagementService interface and key versioning).
+  - Authored docs/perf/capacity.md establishing 100k daily consultations traffic analysis (12 peak flows/sec, ~150 write TPS, 500 RPS reads), annual storage projection (~473.5 GB/year), and hop-by-hop latency budgets (p95 < 200ms read, p95 < 500ms write).
+  - Committed changes (commit 8cd5567).
+
+Verification:
+  - ADRs and capacity docs cross-referenced and fully aligned with PRD §3, §4, §5, §6.
+  - Phase 0 is 100% complete (4/4 tasks done).
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Envelope encryption stores key_version alongside iv, auth_tag, and encrypted_dek.
+  - Capacity plan accounts for write amplification in saga steps and partitions consultations and audit logs monthly.
+
+Next:
+  - Phase 1: T-010 (Scaffold NestJS + Fastify, TypeScript strict, folder layout per prompt.md §3.2, separate main.ts and worker.ts).
+
+--------------------------------------------------------------------------------
+
+[ENTRY #004] 2026-10-27T22:00:00+05:30
+Task(s):    T-010, T-011, T-012, T-013, T-014, T-015, T-016
+Phase:      1 — Project Scaffolding and Local Environment
+Status:     DONE
+
+Completed:
+  - T-010: Scaffolded NestFastifyApplication with dual entrypoints (src/main.ts for REST API, src/worker.ts for BullMQ background workers). Configured tsconfig.json with TypeScript strict mode and path aliases (@modules, @common, @infra).
+  - T-011: Implemented strongly-typed ConfigModule and AppConfigService validated against Zod schema (EnvSchema) ensuring fail-fast execution on missing or invalid environment variables.
+  - T-012: Established ESLint, Prettier, and Jest configurations. Validated npm run lint and npm run typecheck pass with zero warnings or errors.
+  - T-013: Created multi-stage production Dockerfile utilizing node:20-alpine, non-root user (node), reproducible build, and health check probe. Added comprehensive .dockerignore.
+  - T-014: Authored docker-compose.yml defining container orchestration for postgres (v16-alpine), redis (v7-alpine), api, and worker services with persistent volumes and healthchecks.
+  - T-015: Implemented HealthModule providing /api/v1/health/live and /api/v1/health/ready probes with graceful shutdown drainage support.
+  - T-016: Built deterministic test abstractions: IClock, SystemClock, FakeClock (with time advancement utilities), and IIdGenerator with UuidV7IdGenerator.
+  - Added unit test suites: tests/unit/config.spec.ts, tests/unit/health.spec.ts, and tests/unit/clock-and-id.spec.ts.
+  - Committed Phase 1 code (commit 9f0225e).
+
+Verification:
+  - npm run typecheck passed with zero errors.
+  - npm run lint passed with zero errors and zero warnings across all source and test files.
+  - npm run test passed with 11/11 tests across 3 test suites passing.
+  - nest build compiled successfully into dist/.
+  - Phase 1 is 100% complete (7/7 tasks done).
+
+Issues encountered:
+  - Prettier formatting discrepancies flagged during eslint; resolved cleanly with `npm run format`.
+
+Decisions made:
+  - Fastify chosen as HTTP engine for high throughput and low p95 latency.
+  - UUIDv7 chosen for primary keys due to its monotonic time-ordering properties, eliminating B-tree fragmentation in PostgreSQL.
+
+Next:
+  - Phase 2: T-020 through T-029 (Database, Data Model, Kysely setup, migrations with exclusion constraints, partial unique indexes, audit log triggers, and partition maintenance).
+

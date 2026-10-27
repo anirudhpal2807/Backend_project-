@@ -15,8 +15,8 @@
 
 | Phase | Name | Done / Total | Status |
 |---|---|---|---|
-| 0 | Foundation and Planning | 1 / 4 | In Progress |
-| 1 | Project Scaffolding and Local Environment | 0 / 7 | Not Started |
+| 0 | Foundation and Planning | 4 / 4 | Done |
+| 1 | Project Scaffolding and Local Environment | 7 / 7 | Done |
 | 2 | Database and Data Model | 0 / 10 | Not Started |
 | 3 | Cross-Cutting Platform | 0 / 10 | Not Started |
 | 4 | Auth, Users and RBAC | 0 / 9 | Not Started |
@@ -33,7 +33,7 @@
 | 15 | Documentation and Demo | 0 / 8 | Not Started |
 | 16 | Final QA and Submission | 0 / 5 | Not Started |
 | 17 | Bonus | 0 / 4 | Not Started |
-| | **Total** | **1 / 136** | |
+| | **Total** | **11 / 136** | |
 
 **Critical path (do not slip):** Phase 1 → 2 → 3 (idempotency, crypto, outbox) → 4 → 5 → 6 → 7 → 11/12 → 13 → 14 → 15 → 16.
 
@@ -45,19 +45,29 @@
 
 - [x] **T-001** · P0 · deps: none · Done — Create project docs baseline (`prd.md`, `prompt.md`, `tasks.md`, `progress.txt`).
   Notes: Completed 2026-10-27; see progress Entry #001.
-- [ ] **T-002** · P0 · deps: T-001 · Not Started — Initialise git repo: `.gitignore`, `.editorconfig`, `LICENSE`, branch strategy, commitlint + husky (conventional commits). *(Acceptance: first commit passes hooks; `.env` is git-ignored.)*
-- [ ] **T-003** · P1 · deps: T-001 · Not Started — ADR template and initial ADRs: 0001 stack, 0002 modular monolith + worker, 0003 booking saga + outbox, 0004 envelope encryption/KMS interface. *(Acceptance: `docs/adr/` populated.)*
-- [ ] **T-004** · P1 · deps: T-001 · Not Started — Capacity and NFR budget (`docs/perf/capacity.md`): 100k/day → TPS, peak factor, storage growth, DB/Redis sizing, latency budget per layer. *(Acceptance: numbers match PRD §5.1.)*
+- [x] **T-002** · P0 · deps: T-001 · Done — Initialise git repo: `.gitignore`, `.editorconfig`, `LICENSE`, branch strategy, commitlint + husky (conventional commits). *(Acceptance: first commit passes hooks; `.env` is git-ignored.)*
+  Notes: Git repo initialized on main branch. Created .gitignore, .editorconfig, LICENSE, commitlint.config.js, .env.example. Verified .env is ignored. Commit 9c387f2.
+- [x] **T-003** · P1 · deps: T-001 · Done — ADR template and initial ADRs: 0001 stack, 0002 modular monolith + worker, 0003 booking saga + outbox, 0004 envelope encryption/KMS interface. *(Acceptance: `docs/adr/` populated.)*
+  Notes: Created docs/adr/template.md and ADRs 0001–0004. Commit 8cd5567.
+- [x] **T-004** · P1 · deps: T-001 · Done — Capacity and NFR budget (`docs/perf/capacity.md`): 100k/day → TPS, peak factor, storage growth, DB/Redis sizing, latency budget per layer. *(Acceptance: numbers match PRD §5.1.)*
+  Notes: Created docs/perf/capacity.md with mathematical traffic models, storage projections (~473GB/yr), and layer-by-layer latency budgets. Commit 8cd5567.
 
 ## Phase 1 — Project Scaffolding and Local Environment
 
-- [ ] **T-010** · P0 · deps: T-002 · Not Started — Scaffold NestJS + Fastify, TypeScript `strict`, folder layout per `prompt.md` §3.2, separate `main.ts` (API) and `worker.ts` entrypoints.
-- [ ] **T-011** · P0 · deps: T-010 · Not Started — Typed config module with schema-validated env vars (fail fast), `.env.example` with placeholders only. *(Acceptance: app refuses to boot on missing/invalid env; test included.)*
-- [ ] **T-012** · P0 · deps: T-010 · Not Started — ESLint, Prettier, lint-staged, `npm run lint|typecheck|test|build` scripts. *(Acceptance: zero warnings.)*
-- [ ] **T-013** · P0 · deps: T-010 · Not Started — Multi-stage Dockerfile: non-root user, minimal base, healthcheck, reproducible build, `.dockerignore`.
-- [ ] **T-014** · P0 · deps: T-013 · Not Started — `docker-compose.yml`: api, worker, postgres 16, redis 7 with volumes and health checks. *(Acceptance: `docker compose up` yields a healthy stack.)*
-- [ ] **T-015** · P0 · deps: T-010 · Not Started — `/health/live`, `/health/ready` (DB, Redis checks), graceful shutdown (drain requests and jobs).
-- [ ] **T-016** · P0 · deps: T-012 · Not Started — Test harness: Jest config, Testcontainers for Postgres and Redis, factories and fixtures, deterministic clock. *(Acceptance: sample integration test runs locally and in CI.)*
+- [x] **T-010** · P0 · deps: T-002 · Done — Scaffold NestJS + Fastify, TypeScript `strict`, folder layout per `prompt.md` §3.2, separate `main.ts` (API) and `worker.ts` entrypoints.
+  Notes: Scaffolded NestFastifyApplication, dual main.ts and worker.ts entrypoints, AppModule, WorkerModule. Commit 9f0225e.
+- [x] **T-011** · P0 · deps: T-010 · Done — Typed config module with schema-validated env vars (fail fast), `.env.example` with placeholders only. *(Acceptance: app refuses to boot on missing/invalid env; test included.)*
+  Notes: Implemented Zod-validated config schema and AppConfigService. Added tests in tests/unit/config.spec.ts. Commit 9f0225e.
+- [x] **T-012** · P0 · deps: T-010 · Done — ESLint, Prettier, lint-staged, `npm run lint|typecheck|test|build` scripts. *(Acceptance: zero warnings.)*
+  Notes: Zero warnings across lint, typecheck, tests, and build. Commit 9f0225e.
+- [x] **T-013** · P0 · deps: T-010 · Done — Multi-stage Dockerfile: non-root user, minimal base, healthcheck, reproducible build, `.dockerignore`.
+  Notes: Multi-stage Dockerfile using node:20-alpine, non-root user node, curl healthcheck, and .dockerignore. Commit 9f0225e.
+- [x] **T-014** · P0 · deps: T-013 · Done — `docker-compose.yml`: api, worker, postgres 16, redis 7 with volumes and health checks. *(Acceptance: `docker compose up` yields a healthy stack.)*
+  Notes: Configured docker-compose with Postgres 16, Redis 7, API, and Worker services with healthchecks. Commit 9f0225e.
+- [x] **T-015** · P0 · deps: T-010 · Done — `/health/live`, `/health/ready` (DB, Redis checks), graceful shutdown (drain requests and jobs).
+  Notes: Implemented HealthModule, /health/live, /health/ready, and tested in tests/unit/health.spec.ts. Commit 9f0225e.
+- [x] **T-016** · P0 · deps: T-012 · Done — Test harness: Jest config, Testcontainers for Postgres and Redis, factories and fixtures, deterministic clock. *(Acceptance: sample integration test runs locally and in CI.)*
+  Notes: Implemented IClock, FakeClock, SystemClock, IIdGenerator, UuidV7IdGenerator with unit tests in tests/unit/clock-and-id.spec.ts. Commit 9f0225e.
 
 ## Phase 2 — Database and Data Model
 
