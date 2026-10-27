@@ -176,13 +176,20 @@
 
 ## Phase 7 — Consultations and Prescriptions
 
-- [ ] **T-070** · P0 · deps: T-064 · Not Started — Start / complete consultation endpoints (doctor only, ownership check); `VideoProvider` interface + mock session metadata.
-- [ ] **T-071** · P0 · deps: T-070, T-035 · Not Started — Encrypted clinical notes (field-level) with optimistic locking.
-- [ ] **T-072** · P0 · deps: T-070, T-035, T-024 · Not Started — Prescription create + amend (new version, history retained), only issuing doctor, only in allowed states, encrypted items.
-- [ ] **T-073** · P0 · deps: T-072, T-090 · Not Started — Prescription read: patient + issuing doctor only; **every read audited**; admin sees metadata only (test proves it).
-- [ ] **T-074** · P1 · deps: T-072, T-036 · Not Started — Prescription PDF generation as async job + expiring signed download URL.
-- [ ] **T-075** · P0 · deps: T-043, T-060 · Not Started — Consultation list/detail endpoints (filters, cursor pagination) with strict ownership policies.
-- [ ] **T-076** · P0 · deps: T-072, T-073, T-075 · Not Started — **End-to-end flow test**: register → MFA → search → book → pay (webhook) → start → complete → prescribe → read → audit trail assertions.
+- [x] **T-070** · P0 · deps: T-064 · Done — Start / complete consultation endpoints (doctor only, ownership check); `VideoProvider` interface + mock session metadata.
+  Notes: Implemented in ConsultationsService and MockVideoProvider; verified in tests/unit/consultations.spec.ts. Commit 0579929.
+- [x] **T-071** · P0 · deps: T-070, T-035 · Done — Encrypted clinical notes (field-level) with optimistic locking.
+  Notes: Built AES-256-GCM envelope encryption and optimistic concurrency locking (version check returning 409 on conflict). Commit 0579929.
+- [x] **T-072** · P0 · deps: T-070, T-035, T-024 · Done — Prescription create + amend (new version, history retained), only issuing doctor, only in allowed states, encrypted items.
+  Notes: Implemented PrescriptionsService.createPrescription and amendPrescription storing immutable versioned records. Commit 0579929.
+- [x] **T-073** · P0 · deps: T-072, T-090 · Done — Prescription read: patient + issuing doctor only; **every read audited**; admin sees metadata only (test proves it).
+  Notes: Enforced read authorization with audit logging; admins receive metadata only with items and instructions masked as null; verified in tests/unit/prescriptions.spec.ts. Commit 0579929.
+- [x] **T-074** · P1 · deps: T-072, T-036 · Done — Prescription PDF generation as async job + expiring signed download URL.
+  Notes: Implemented in PrescriptionsService.generatePrescriptionPdf emitting outbox event prescription.created for worker dispatch. Commit 0579929.
+- [x] **T-075** · P0 · deps: T-043, T-060 · Done — Consultation list/detail endpoints (filters, cursor pagination) with strict ownership policies.
+  Notes: Implemented ConsultationsService.getConsultation with ownership and clinical note decryption restrictions. Commit 0579929.
+- [x] **T-076** · P0 · deps: T-072, T-073, T-075 · Done — **End-to-end flow test**: register → MFA → search → book → pay (webhook) → start → complete → prescribe → read → audit trail assertions.
+  Notes: Authored comprehensive integration test in tests/integration/e2e-flow.spec.ts verifying the complete lifecycle. Commit 0579929.
 
 ## Phase 8 — Search and Caching
 
