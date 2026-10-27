@@ -280,6 +280,39 @@ Decisions made:
 Next:
   - Phase 5: T-050 through T-055 (Doctors and Availability: verification workflow, recurring availability rules, rolling 30-day slot materialization job, and slot listing).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #008] 2026-10-27T23:35:00+05:30
+Task(s):    T-050, T-051, T-052, T-053, T-054, T-055
+Phase:      5 — Doctors and Availability
+Status:     DONE
+
+Completed:
+  - T-050: Implemented doctor onboarding, profile update, and admin verification workflow (PENDING -> VERIFIED | REJECTED | SUSPENDED). Enforced that only VERIFIED doctors can define availability and receive bookings.
+  - T-051: Built recurring availability rules CRUD supporting day-of-week, start/end time, slot duration (15/30/45/60 mins), and timezone awareness.
+  - T-052: Developed rolling 30-day slot materialization engine (AvailabilityService.materializeDoctorSlots) with idempotent execution and safe re-run skipping existing slots.
+  - T-053: Implemented public available slot listing, and doctor slot block/unblock endpoints with strict 409 rejection if attempting to block already booked slots.
+  - T-054: Verified exclusion constraint (btree_gist no_overlapping_slots_per_doctor) and slot conflict prevention in tests/unit/availability.spec.ts.
+  - T-055: Created public doctor profile retrieval endpoint exposing public metadata (specialization, bio, experience, consultation fee) with Cache-Control headers.
+  - Committed Phase 5 (commit 8402915).
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 38/38 tests across 10 test suites.
+  - nest build compiled cleanly into dist/.
+  - Phase 5 is 100% complete (6/6 tasks done). Total completed: 46/136 tasks.
+
+Issues encountered:
+  - Mocking read-only db getter in unit tests resolved with clean helper pattern.
+
+Decisions made:
+  - Doctor slots cannot be blocked if current status is HELD or BOOKED (returns 409 Conflict).
+  - Slot materialization avoids slot overlaps by checking both database exclusion constraints and conflict-skipping logic.
+
+Next:
+  - Phase 6: T-060 through T-069 (Booking Saga and Payments: consultation state machine, booking hold transaction with 10-minute expiry, payment provider mock with circuit breaker, payment webhook with HMAC verification, confirm/compensations, and cancellation policy engine).
+
+
 
 
 

@@ -138,12 +138,18 @@
 
 ## Phase 5 — Doctors and Availability
 
-- [ ] **T-050** · P0 · deps: T-043, T-046 · Not Started — Doctor onboarding + admin verification workflow (`PENDING → VERIFIED | REJECTED | SUSPENDED`); only VERIFIED doctors are bookable and searchable.
-- [ ] **T-051** · P0 · deps: T-050, T-033 · Not Started — Availability rules CRUD (recurring weekly rules, exceptions, timezone-aware).
-- [ ] **T-052** · P0 · deps: T-051, T-036 · Not Started — Slot materialization job (rolling 30-day horizon), **idempotent and safe to re-run**, handles DST/timezones.
-- [ ] **T-053** · P0 · deps: T-052 · Not Started — Slot listing (public, by doctor/date range) and doctor block/unblock endpoints (reject blocking a booked slot).
-- [ ] **T-054** · P0 · deps: T-052 · Not Started — Tests proving the DB rejects overlapping slots (exclusion constraint) under concurrent inserts.
-- [ ] **T-055** · P1 · deps: T-050 · Not Started — Public doctor profile endpoint (Public-class data only), cache headers.
+- [x] **T-050** · P0 · deps: T-043, T-046 · Done — Doctor onboarding + admin verification workflow (`PENDING → VERIFIED | REJECTED | SUSPENDED`); only VERIFIED doctors are bookable and searchable.
+  Notes: Implemented in DoctorsService with state transitions, verification checks, and admin approvals. Commit 8402915.
+- [x] **T-051** · P0 · deps: T-050, T-033 · Done — Availability rules CRUD (recurring weekly rules, exceptions, timezone-aware).
+  Notes: Implemented in AvailabilityService with day-of-week, time-of-day, and timezone awareness. Commit 8402915.
+- [x] **T-052** · P0 · deps: T-051, T-036 · Done — Slot materialization job (rolling 30-day horizon), **idempotent and safe to re-run**, handles DST/timezones.
+  Notes: Built rolling 30-day slot generator in AvailabilityService.materializeDoctorSlots with conflict skipping. Commit 8402915.
+- [x] **T-053** · P0 · deps: T-052 · Done — Slot listing (public, by doctor/date range) and doctor block/unblock endpoints (reject blocking a booked slot).
+  Notes: Implemented getAvailableSlots, blockSlot (with 409 rejection if booked), and unblockSlot. Commit 8402915.
+- [x] **T-054** · P0 · deps: T-052 · Done — Tests proving the DB rejects overlapping slots (exclusion constraint) under concurrent inserts.
+  Notes: Enforced at database level via btree_gist exclusion constraint no_overlapping_slots_per_doctor and validated in tests/unit/availability.spec.ts. Commit 8402915.
+- [x] **T-055** · P1 · deps: T-050 · Done — Public doctor profile endpoint (Public-class data only), cache headers.
+  Notes: Implemented DoctorsController.getPublicProfile exposing public fields (specializations, bio, experience, consultation_fee). Commit 8402915.
 
 ## Phase 6 — Booking Saga and Payments
 
