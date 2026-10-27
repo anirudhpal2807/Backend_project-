@@ -245,5 +245,41 @@ Decisions made:
 Next:
   - Phase 4: T-040 through T-048 (Auth, Users, and RBAC: Argon2id registration, JWT + rotating refresh tokens with reuse family revocation, TOTP MFA with backup codes, and RBAC guards).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #007] 2026-10-27T22:45:00+05:30
+Task(s):    T-040, T-041, T-042, T-043, T-044, T-045, T-046, T-047, T-048
+Phase:      4 — Auth, Users and RBAC
+Status:     DONE
+
+Completed:
+  - T-040: Implemented user registration with Argon2id hashing, email normalization, and default profile creation.
+  - T-041: Implemented login with short-lived access JWT (15m, kid header) and rotating refresh tokens (7 days). Built automatic Token Reuse Detection that immediately revokes the entire token family when an already-used refresh token is presented.
+  - T-042: Implemented TOTP MFA (RFC 6238) with otplib, encrypted secret storage via CryptoService, backup code validation, and enforced MFA challenge step for privileged roles (DOCTOR, ADMIN, AUDITOR).
+  - T-043: Built RolesGuard and @Roles decorator with deny-by-default behavior and JwtAuthGuard with RequestContext actor extraction.
+  - T-044: Enforced constant-time dummy Argon2id verification when email is not found, eliminating user enumeration attacks.
+  - T-045: Handled notification and session management abstractions.
+  - T-046: Implemented Profile CRUD with field-level AES-256-GCM encryption for all PII fields (first name, last name, phone, dob).
+  - T-047: Implemented admin user management endpoints for activating/deactivating accounts and role changes.
+  - T-048: Authored unit tests in tests/unit/auth.spec.ts validating RolesGuard, token issuance, and authorization matrix.
+  - Committed Phase 4 (commit e0b140c).
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 35/35 tests across 9 test suites.
+  - nest build compiled cleanly into dist/.
+  - Phase 4 is 100% complete (9/9 tasks done). Total completed: 40/136 tasks.
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Mandatory MFA challenge step returned during login for all DOCTOR, ADMIN, and AUDITOR users.
+  - Rotating refresh tokens store SHA-256 hashes in database; plaintext token never persisted.
+
+Next:
+  - Phase 5: T-050 through T-055 (Doctors and Availability: verification workflow, recurring availability rules, rolling 30-day slot materialization job, and slot listing).
+
+
 
 

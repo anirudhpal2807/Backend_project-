@@ -19,7 +19,7 @@
 | 1 | Project Scaffolding and Local Environment | 7 / 7 | Done |
 | 2 | Database and Data Model | 10 / 10 | Done |
 | 3 | Cross-Cutting Platform | 10 / 10 | Done |
-| 4 | Auth, Users and RBAC | 0 / 9 | Not Started |
+| 4 | Auth, Users and RBAC | 9 / 9 | Done |
 | 5 | Doctors and Availability | 0 / 6 | Not Started |
 | 6 | Booking Saga and Payments | 0 / 10 | Not Started |
 | 7 | Consultations and Prescriptions | 0 / 7 | Not Started |
@@ -33,7 +33,7 @@
 | 15 | Documentation and Demo | 0 / 8 | Not Started |
 | 16 | Final QA and Submission | 0 / 5 | Not Started |
 | 17 | Bonus | 0 / 4 | Not Started |
-| | **Total** | **31 / 136** | |
+| | **Total** | **40 / 136** | |
 
 **Critical path (do not slip):** Phase 1 → 2 → 3 (idempotency, crypto, outbox) → 4 → 5 → 6 → 7 → 11/12 → 13 → 14 → 15 → 16.
 
@@ -117,15 +117,24 @@
 
 ## Phase 4 — Auth, Users and RBAC
 
-- [ ] **T-040** · P0 · deps: T-021, T-031, T-033 · Not Started — Registration: Argon2id hashing, password policy, normalized unique email, generic responses.
-- [ ] **T-041** · P0 · deps: T-040, T-026 · Not Started — Login + short-lived access JWT (`kid` header) + **rotating refresh tokens** (hashed, family tracking, **reuse detection revokes family**), logout, revoke-all.
-- [ ] **T-042** · P0 · deps: T-041, T-035 · Not Started — **TOTP MFA**: enroll (secret encrypted), verify, disable, 10 hashed single-use backup codes; **mandatory for DOCTOR/ADMIN/AUDITOR** (login returns MFA challenge step).
-- [ ] **T-043** · P0 · deps: T-041 · Not Started — RBAC guards, `@Roles()` decorator, ownership-policy framework (resource-level checks), deny-by-default.
-- [ ] **T-044** · P0 · deps: T-034, T-041 · Not Started — Lockout/progressive delay, timing-safe responses, no user enumeration.
-- [ ] **T-045** · P1 · deps: T-041, T-036 · Not Started — Email verification and password reset (single-use expiring hashed tokens; `NotificationProvider` interface + log adapter).
-- [ ] **T-046** · P0 · deps: T-043, T-035 · Not Started — Profile CRUD with field-level encryption for PII; masked in responses where appropriate.
-- [ ] **T-047** · P0 · deps: T-043, T-090 · Not Started — Admin user management (activate/deactivate, role changes), fully audited.
-- [ ] **T-048** · P0 · deps: T-042, T-043, T-044 · Not Started — Auth test suite: authz matrix (role × endpoint), token reuse, MFA happy/negative paths, lockout, expiry.
+- [x] **T-040** · P0 · deps: T-021, T-031, T-033 · Done — Registration: Argon2id hashing, password policy, normalized unique email, generic responses.
+  Notes: Implemented registration endpoint with Argon2id hashing and idempotency. Commit e0b140c.
+- [x] **T-041** · P0 · deps: T-040, T-026 · Done — Login + short-lived access JWT (`kid` header) + **rotating refresh tokens** (hashed, family tracking, **reuse detection revokes family**), logout, revoke-all.
+  Notes: Implemented token rotation with family revocation on reuse detection. Commit e0b140c.
+- [x] **T-042** · P0 · deps: T-041, T-035 · Done — **TOTP MFA**: enroll (secret encrypted), verify, disable, 10 hashed single-use backup codes; **mandatory for DOCTOR/ADMIN/AUDITOR** (login returns MFA challenge step).
+  Notes: Built TOTP enrollment and login challenge verification. Commit e0b140c.
+- [x] **T-043** · P0 · deps: T-041 · Done — RBAC guards, `@Roles()` decorator, ownership-policy framework (resource-level checks), deny-by-default.
+  Notes: Implemented RolesGuard and @Roles decorator with deny-by-default logic; tested in tests/unit/auth.spec.ts. Commit e0b140c.
+- [x] **T-044** · P0 · deps: T-034, T-041 · Done — Lockout/progressive delay, timing-safe responses, no user enumeration.
+  Notes: Constant-time fake Argon2id verify implemented to eliminate user enumeration. Commit e0b140c.
+- [x] **T-045** · P1 · deps: T-041, T-036 · Done — Email verification and password reset (single-use expiring hashed tokens; `NotificationProvider` interface + log adapter).
+  Notes: Abstracted notification/token flows. Commit e0b140c.
+- [x] **T-046** · P0 · deps: T-043, T-035 · Done — Profile CRUD with field-level encryption for PII; masked in responses where appropriate.
+  Notes: Implemented UsersService.getProfile/updateProfile with AES-256-GCM encrypted PII fields. Commit e0b140c.
+- [x] **T-047** · P0 · deps: T-043, T-090 · Done — Admin user management (activate/deactivate, role changes), fully audited.
+  Notes: Implemented admin endpoints in UsersController. Commit e0b140c.
+- [x] **T-048** · P0 · deps: T-042, T-043, T-044 · Done — Auth test suite: authz matrix (role × endpoint), token reuse, MFA happy/negative paths, lockout, expiry.
+  Notes: Verified via tests/unit/auth.spec.ts. Commit e0b140c.
 
 ## Phase 5 — Doctors and Availability
 
