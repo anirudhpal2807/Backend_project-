@@ -9,6 +9,8 @@ import { QueueModule } from './infra/queue/queue.module';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { DoctorsModule } from './modules/doctors/doctors.module';
+import { AvailabilityModule } from './modules/availability/availability.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
 import { IdempotencyInterceptor } from './common/idempotency/idempotency.interceptor';
@@ -24,6 +26,8 @@ import { IdempotencyInterceptor } from './common/idempotency/idempotency.interce
     HealthModule,
     AuthModule,
     UsersModule,
+    DoctorsModule,
+    AvailabilityModule,
   ],
   providers: [
     {
