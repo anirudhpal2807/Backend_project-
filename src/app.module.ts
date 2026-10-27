@@ -7,6 +7,8 @@ import { CryptoModule } from './infra/crypto/crypto.module';
 import { IdempotencyModule } from './common/idempotency/idempotency.module';
 import { QueueModule } from './infra/queue/queue.module';
 import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
 import { IdempotencyInterceptor } from './common/idempotency/idempotency.interceptor';
@@ -20,6 +22,8 @@ import { IdempotencyInterceptor } from './common/idempotency/idempotency.interce
     IdempotencyModule,
     QueueModule,
     HealthModule,
+    AuthModule,
+    UsersModule,
   ],
   providers: [
     {
