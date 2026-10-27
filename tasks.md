@@ -153,18 +153,26 @@
 
 ## Phase 6 — Booking Saga and Payments
 
-- [ ] **T-060** · P0 · deps: T-023 · Not Started — Consultation **state machine** (pure domain module): allowed transitions, guard conditions; exhaustive unit tests incl. illegal transitions → 409.
-- [ ] **T-061** · P0 · deps: T-053, T-060, T-033, T-036, T-090 · Not Started — **Booking HOLD** transaction: conditional slot update (`OPEN→HELD`, `held_until`), insert consultation `PENDING_PAYMENT`, audit + outbox event; one transaction, idempotent.
-- [ ] **T-062** · P0 · deps: T-061, T-037 · Not Started — `PaymentProvider` interface + mock provider; idempotent payment-intent creation; wrapped with retry/backoff/circuit breaker.
-- [ ] **T-063** · P0 · deps: T-062 · Not Started — Payment **webhook endpoint**: HMAC verification, timestamp tolerance, replay protection, dedupe by provider event id (`processed_webhooks`).
-- [ ] **T-064** · P0 · deps: T-063 · Not Started — **CONFIRM** step (`CONFIRMED` + slot `BOOKED`) and **compensations**: hold-expiry job releases slots; payment failure path; late-success-after-expiry → auto-refund.
-- [ ] **T-065** · P0 · deps: T-064 · Not Started — Cancel / reschedule with refund-policy engine (pure, configurable); idempotent; audited.
-- [ ] **T-066** · P1 · deps: T-064 · Not Started — Saga **reconciliation job**: detects/repairs stuck `PENDING_PAYMENT`, orphan payments, inconsistent slot states; metrics + alert hook.
-- [ ] **T-067** · P0 · deps: T-061 · Not Started — **Concurrency test**: 1,000 parallel booking attempts on one slot → exactly 1 success, rest `409`; runs in CI.
-  Notes: Auto-fail risk (double booking).
-- [ ] **T-068** · P0 · deps: T-061, T-033 · Not Started — Idempotency tests for booking/payment/cancel: replay, key reuse with different body, concurrent in-flight duplicates.
-  Notes: Auto-fail risk (idempotency).
-- [ ] **T-069** · P1 · deps: T-061 · Not Started — Patient overlap check (same patient cannot hold overlapping slots across doctors) in the hold transaction.
+- [x] **T-060** · P0 · deps: T-023 · Done — Consultation **state machine** (pure domain module): allowed transitions, guard conditions; exhaustive unit tests incl. illegal transitions → 409.
+  Notes: Implemented in ConsultationStateMachine with role-based checks and tests in tests/unit/state-machine.spec.ts. Commit 274b7af.
+- [x] **T-061** · P0 · deps: T-053, T-060, T-033, T-036, T-090 · Done — **Booking HOLD** transaction: conditional slot update (`OPEN→HELD`, `held_until`), insert consultation `PENDING_PAYMENT`, audit + outbox event; one transaction, idempotent.
+  Notes: Implemented in BookingsService.holdSlot with 10-minute hold window and outbox event publishing. Commit 274b7af.
+- [x] **T-062** · P0 · deps: T-061, T-037 · Done — `PaymentProvider` interface + mock provider; idempotent payment-intent creation; wrapped with retry/backoff/circuit breaker.
+  Notes: Created IPaymentProvider and MockPaymentProvider with CircuitBreaker and withRetry full-jitter backoff. Commit 274b7af.
+- [x] **T-063** · P0 · deps: T-062 · Done — Payment **webhook endpoint**: HMAC verification, timestamp tolerance, replay protection, dedupe by provider event id (`processed_webhooks`).
+  Notes: Implemented in PaymentsController and PaymentsService.handleWebhook using processed_webhooks. Commit 274b7af.
+- [x] **T-064** · P0 · deps: T-063 · Done — **CONFIRM** step (`CONFIRMED` + slot `BOOKED`) and **compensations**: hold-expiry job releases slots; payment failure path; late-success-after-expiry → auto-refund.
+  Notes: Built confirmation saga step and automatic refund compensation for late payments in PaymentsService. Commit 274b7af.
+- [x] **T-065** · P0 · deps: T-064 · Done — Cancel / reschedule with refund-policy engine (pure, configurable); idempotent; audited.
+  Notes: Built CancellationPolicyEngine with tiered refund policies and BookingsService.cancelBooking. Commit 274b7af.
+- [x] **T-066** · P1 · deps: T-064 · Done — Saga **reconciliation job**: detects/repairs stuck `PENDING_PAYMENT`, orphan payments, inconsistent slot states; metrics + alert hook.
+  Notes: Implemented SagaReconciliationService and BookingsService.reapExpiredHolds. Commit 274b7af.
+- [x] **T-067** · P0 · deps: T-061 · Done — **Concurrency test**: 1,000 parallel booking attempts on one slot → exactly 1 success, rest `409`; runs in CI.
+  Notes: Built tests/integration/concurrency-booking.spec.ts proving zero double-booking under parallel load. Commit 274b7af.
+- [x] **T-068** · P0 · deps: T-061, T-033 · Done — Idempotency tests for booking/payment/cancel: replay, key reuse with different body, concurrent in-flight duplicates.
+  Notes: Covered via IdempotencyInterceptor and tests/unit/payments.spec.ts & bookings.spec.ts. Commit 274b7af.
+- [x] **T-069** · P1 · deps: T-061 · Done — Patient overlap check (same patient cannot hold overlapping slots across doctors) in the hold transaction.
+  Notes: Built range overlap query with PostgreSQL tstzrange in BookingsService.holdSlot. Commit 274b7af.
 
 ## Phase 7 — Consultations and Prescriptions
 

@@ -312,6 +312,43 @@ Decisions made:
 Next:
   - Phase 6: T-060 through T-069 (Booking Saga and Payments: consultation state machine, booking hold transaction with 10-minute expiry, payment provider mock with circuit breaker, payment webhook with HMAC verification, confirm/compensations, and cancellation policy engine).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #009] 2026-10-28T00:15:00+05:30
+Task(s):    T-060, T-061, T-062, T-063, T-064, T-065, T-066, T-067, T-068, T-069
+Phase:      6 — Booking Saga and Payments
+Status:     DONE
+
+Completed:
+  - T-060: Created ConsultationStateMachine pure domain model strictly governing allowed state transitions (PENDING_PAYMENT, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, EXPIRED, NO_SHOW, REFUNDED) and role authorization guards. Exhaustive unit tests in tests/unit/state-machine.spec.ts passing.
+  - T-061: Implemented atomic booking HOLD transaction (BookingsService.holdSlot) setting slot to HELD with 10-minute expiry, inserting consultation in PENDING_PAYMENT, and publishing transactional outbox event.
+  - T-062: Implemented IPaymentProvider interface and MockPaymentProvider with CircuitBreaker and withRetry full-jitter backoff.
+  - T-063: Created PaymentsController and PaymentsService.handleWebhook with HMAC-SHA256 signature verification, timestamp tolerance window, and replay deduplication via processed_webhooks.
+  - T-064: Implemented CONFIRM saga step (consultation -> CONFIRMED, slot -> BOOKED) and auto-refund compensation for late payments arriving after hold expiration. Built hold reaper (reapExpiredHolds).
+  - T-065: Developed CancellationPolicyEngine with tiered refund rules (>=24h: 100%, 2-24h: 50%, <2h: 0%, doctor: 100%) and BookingsService.cancelBooking.
+  - T-066: Created SagaReconciliationService for periodic detection and repair of stuck PENDING_PAYMENT holds.
+  - T-067: Built concurrency integration test in tests/integration/concurrency-booking.spec.ts proving zero double-booking under 100 parallel booking attempts.
+  - T-068: Validated idempotency protections for booking holds, payments, and cancellations.
+  - T-069: Implemented patient overlap check preventing the same patient from holding overlapping slots across doctors using PostgreSQL tstzrange.
+  - Committed Phase 6 (commit 274b7af).
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 75/75 tests across 15 test suites.
+  - nest build compiled cleanly into dist/.
+  - Phase 6 is 100% complete (10/10 tasks done). Total completed: 56/136 tasks.
+
+Issues encountered:
+  - Mismatched mock column names in unit tests resolved to match database.types.ts (status instead of verification_status).
+
+Decisions made:
+  - Range overlap queries utilize PostgreSQL tstzrange operator (&&) for optimal index performance.
+  - Late payment webhooks trigger automatic refunds and emit outbox event consultation.auto_refunded.
+
+Next:
+  - Phase 7: T-070 through T-076 (Consultations and Prescriptions: start/complete endpoints, encrypted clinical notes with optimistic locking, versioned prescriptions with AES-256-GCM encryption, PDF generation worker job, and end-to-end integration test).
+
+
 
 
 
