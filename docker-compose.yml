@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: amrutam-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: amrutam_telemed
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d amrutam_telemed"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amrutam-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: amrutam-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - amrutam-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amrutam-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: api/v1
+      LOG_LEVEL: info
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: amrutam_telemed
+      DB_USER: postgres
+      DB_PASSWORD: postgrespassword
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: dev-jwt-secret-at-least-32-chars-long-example
+      REFRESH_TOKEN_SECRET: dev-refresh-token-secret-at-least-32-chars
+      MASTER_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      ENCRYPTION_KEY_VERSION: v1
+      PAYMENT_WEBHOOK_SECRET: mock-payment-webhook-secret-32-bytes-long
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - amrutam-network
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: amrutam-worker
+    restart: unless-stopped
+    command: ["node", "dist/src/worker"]
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: amrutam_telemed
+      DB_USER: postgres
+      DB_PASSWORD: postgrespassword
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: dev-jwt-secret-at-least-32-chars-long-example
+      REFRESH_TOKEN_SECRET: dev-refresh-token-secret-at-least-32-chars
+      MASTER_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      ENCRYPTION_KEY_VERSION: v1
+      PAYMENT_WEBHOOK_SECRET: mock-payment-webhook-secret-32-bytes-long
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - amrutam-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  amrutam-network:
+    driver: bridge
