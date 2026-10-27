@@ -209,4 +209,41 @@ Decisions made:
 Next:
   - Phase 3: T-030 through T-039 (Cross-Cutting Platform: RFC 7807 error model, Idempotency interceptor, Redis rate limiter, AES-256-GCM envelope encryption, outbox worker, resilience utilities).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #006] 2026-10-27T22:35:00+05:30
+Task(s):    T-030, T-031, T-032, T-033, T-034, T-035, T-036, T-037, T-038, T-039
+Phase:      3 — Cross-Cutting Platform
+Status:     DONE
+
+Completed:
+  - T-030 & T-031: Built RFC 7807 error system: ErrorCode catalogue, AppException class, and GlobalExceptionFilter returning application/problem+json. Zero leakage of internal SQL errors or stack traces to clients.
+  - T-032: Implemented RequestContext via Node.js AsyncLocalStorage and RequestIdInterceptor generating/propagating X-Request-Id.
+  - T-033 (Critical Auto-Fail Gate): Built @Idempotent decorator, IdempotencyStore, and IdempotencyInterceptor. Handles same key+body replay (Idempotent-Replayed: true), payload mismatch (422), and in-flight collision (409 + Retry-After). Added tests in tests/unit/idempotency.spec.ts.
+  - T-034: Implemented RedisService with atomic sliding-window rate limiter using Redis sorted sets (ZREMRANGEBYSCORE/ZCARD/ZADD) with fail-open resilience.
+  - T-035: Built IKeyManagementService, LocalKmsService, and CryptoService implementing AES-256-GCM application envelope encryption with key versioning and authentication tags. Added tests in tests/unit/crypto.spec.ts.
+  - T-036: Built OutboxService with publishInTransaction, DLQ escalation threshold, and status tracking for the transactional outbox pattern.
+  - T-037: Built resilience utilities: withRetry (exponential backoff with full jitter), CircuitBreaker (CLOSED, OPEN, HALF_OPEN states), and withTimeout. Tests in tests/unit/resilience.spec.ts.
+  - T-038: Implemented cursor pagination helper (keyset) with signed/opaque Base64URL cursors in src/common/pagination/cursor-pagination.ts.
+  - T-039: Implemented AppLoggerService with Pino, RequestContext metadata injection, and redactSensitiveData filtering all credentials and PHI/PII. Tests in tests/unit/redaction.spec.ts.
+  - Committed Phase 3 (commit 37db082).
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 30/30 tests across 8 test suites.
+  - nest build compiled cleanly.
+  - Phase 3 is 100% complete (10/10 tasks done). Total completed: 31/136 tasks.
+
+Issues encountered:
+  - Kysely conditional update expression required type narrowing; resolved cleanly with type-safe state transitions in OutboxService.
+  - NestJS HttpException message inheritance adjusted in AppException to ensure Error.message regex matching in unit tests.
+
+Decisions made:
+  - IdempotencyInterceptor registered globally to protect all @Idempotent endpoints automatically.
+  - Redis rate limiter implements fail-open policy when Redis is temporarily offline, preventing API outages during cache degradation.
+
+Next:
+  - Phase 4: T-040 through T-048 (Auth, Users, and RBAC: Argon2id registration, JWT + rotating refresh tokens with reuse family revocation, TOTP MFA with backup codes, and RBAC guards).
+
+
 

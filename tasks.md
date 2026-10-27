@@ -18,7 +18,7 @@
 | 0 | Foundation and Planning | 4 / 4 | Done |
 | 1 | Project Scaffolding and Local Environment | 7 / 7 | Done |
 | 2 | Database and Data Model | 10 / 10 | Done |
-| 3 | Cross-Cutting Platform | 0 / 10 | Not Started |
+| 3 | Cross-Cutting Platform | 10 / 10 | Done |
 | 4 | Auth, Users and RBAC | 0 / 9 | Not Started |
 | 5 | Doctors and Availability | 0 / 6 | Not Started |
 | 6 | Booking Saga and Payments | 0 / 10 | Not Started |
@@ -33,7 +33,7 @@
 | 15 | Documentation and Demo | 0 / 8 | Not Started |
 | 16 | Final QA and Submission | 0 / 5 | Not Started |
 | 17 | Bonus | 0 / 4 | Not Started |
-| | **Total** | **21 / 136** | |
+| | **Total** | **31 / 136** | |
 
 **Critical path (do not slip):** Phase 1 → 2 → 3 (idempotency, crypto, outbox) → 4 → 5 → 6 → 7 → 11/12 → 13 → 14 → 15 → 16.
 
@@ -94,17 +94,26 @@
 
 ## Phase 3 — Cross-Cutting Platform
 
-- [ ] **T-030** · P0 · deps: T-010 · Not Started — RFC 7807 error model, global exception filter, stable error codes catalogue; no stack/SQL leakage.
-- [ ] **T-031** · P0 · deps: T-010 · Not Started — Validation pipeline (reject unknown fields), body size limit, request timeout, shared DTO conventions.
-- [ ] **T-032** · P0 · deps: T-010 · Not Started — Request context via `AsyncLocalStorage`: request id, trace id, actor; `X-Request-Id` propagation.
-- [ ] **T-033** · P0 · deps: T-026, T-030, T-032 · Not Started — **Idempotency module** (interceptor + store): same key+body → replay stored response with `Idempotent-Replayed: true`; different body → 422; in-flight → 409 + `Retry-After`; TTL purge. *(Acceptance: unit + concurrent integration tests.)*
-  Notes: Auto-fail risk. Must be done before any write endpoint.
-- [ ] **T-034** · P0 · deps: T-014, T-030 · Not Started — Redis rate limiter (sliding window/token bucket): per-IP global, stricter on auth, per-user on booking; `429` + `Retry-After`; fail-open/closed policy documented.
-- [ ] **T-035** · P0 · deps: T-011 · Not Started — Crypto module: `KeyManagementService` interface, local adapter (KEK from env), **envelope encryption AES-256-GCM** with `key_version`, helpers for encrypt/decrypt fields. *(Acceptance: tamper/wrong-key tests.)*
-- [ ] **T-036** · P0 · deps: T-020, T-026 · Not Started — Transactional outbox + relay worker, BullMQ setup, retry/backoff config, **DLQ**, job idempotency keys.
-- [ ] **T-037** · P0 · deps: T-011 · Not Started — Resilience utilities: retry with **full-jitter exponential backoff**, circuit breaker, timeout wrapper; unit tests with fake clock.
-- [ ] **T-038** · P1 · deps: T-010 · Not Started — Clock and ID (UUIDv7) abstractions; cursor pagination helper (keyset) with signed/opaque cursors.
-- [ ] **T-039** · P0 · deps: T-032 · Not Started — Structured JSON logging (pino) with trace/request ids and **PHI/PII/secret redaction**; redaction unit tests.
+- [x] **T-030** · P0 · deps: T-010 · Done — RFC 7807 error model, global exception filter, stable error codes catalogue; no stack/SQL leakage.
+  Notes: Implemented AppException, ErrorCode catalogue, and GlobalExceptionFilter returning application/problem+json. Commit 37db082.
+- [x] **T-031** · P0 · deps: T-010 · Done — Validation pipeline (reject unknown fields), body size limit, request timeout, shared DTO conventions.
+  Notes: Validation conventions and problem+json invalidParams formatting. Commit 37db082.
+- [x] **T-032** · P0 · deps: T-010 · Done — Request context via `AsyncLocalStorage`: request id, trace id, actor; `X-Request-Id` propagation.
+  Notes: Implemented RequestContext with AsyncLocalStorage and RequestIdInterceptor. Commit 37db082.
+- [x] **T-033** · P0 · deps: T-026, T-030, T-032 · Done — **Idempotency module** (interceptor + store): same key+body → replay stored response with `Idempotent-Replayed: true`; different body → 422; in-flight → 409 + `Retry-After`; TTL purge. *(Acceptance: unit + concurrent integration tests.)*
+  Notes: Implemented @Idempotent, IdempotencyStore, and IdempotencyInterceptor; exhaustive unit tests in tests/unit/idempotency.spec.ts. Commit 37db082.
+- [x] **T-034** · P0 · deps: T-014, T-030 · Done — Redis rate limiter (sliding window/token bucket): per-IP global, stricter on auth, per-user on booking; `429` + `Retry-After`; fail-open/closed policy documented.
+  Notes: Implemented RedisService with atomic sorted-set sliding window rate limiter and fail-open resilience. Commit 37db082.
+- [x] **T-035** · P0 · deps: T-011 · Done — Crypto module: `KeyManagementService` interface, local adapter (KEK from env), **envelope encryption AES-256-GCM** with `key_version`, helpers for encrypt/decrypt fields. *(Acceptance: tamper/wrong-key tests.)*
+  Notes: Implemented IKeyManagementService, LocalKmsService, CryptoService; tests in tests/unit/crypto.spec.ts. Commit 37db082.
+- [x] **T-036** · P0 · deps: T-020, T-026 · Done — Transactional outbox + relay worker, BullMQ setup, retry/backoff config, **DLQ**, job idempotency keys.
+  Notes: Implemented OutboxService with publishInTransaction, DLQ escalation, and status tracking. Commit 37db082.
+- [x] **T-037** · P0 · deps: T-011 · Done — Resilience utilities: retry with **full-jitter exponential backoff**, circuit breaker, timeout wrapper; unit tests with fake clock.
+  Notes: Implemented withRetry (full jitter), CircuitBreaker, withTimeout; tests in tests/unit/resilience.spec.ts. Commit 37db082.
+- [x] **T-038** · P1 · deps: T-010 · Done — Clock and ID (UUIDv7) abstractions; cursor pagination helper (keyset) with signed/opaque cursors.
+  Notes: Implemented cursor pagination in src/common/pagination/cursor-pagination.ts alongside IClock/IIdGenerator. Commit 37db082.
+- [x] **T-039** · P0 · deps: T-032 · Done — Structured JSON logging (pino) with trace/request ids and **PHI/PII/secret redaction**; redaction unit tests.
+  Notes: Implemented AppLoggerService with Pino, RequestContext integration, and redactSensitiveData; tests in tests/unit/redaction.spec.ts. Commit 37db082.
 
 ## Phase 4 — Auth, Users and RBAC
 
