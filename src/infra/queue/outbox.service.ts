@@ -17,15 +17,38 @@ export class OutboxService {
   /**
    * Writes event atomically within a transaction
    */
-  async publishInTransaction(trx: DatabaseTransaction, event: OutboxEventInput): Promise<string> {
+  async publishInTransaction(
+    trx: DatabaseTransaction,
+    eventOrName: OutboxEventInput | string,
+    aggregateType?: string,
+    aggregateId?: string,
+    payload?: Record<string, unknown>,
+  ): Promise<string> {
     const id = uuidv7();
+    let topic: string;
+    let eventName: string;
+    let eventPayload: Record<string, unknown>;
+
+    if (typeof eventOrName === 'string') {
+      topic = aggregateType ?? 'default';
+      eventName = eventOrName;
+      eventPayload = {
+        aggregateId,
+        ...(payload ?? {}),
+      };
+    } else {
+      topic = eventOrName.topic;
+      eventName = eventOrName.eventName;
+      eventPayload = eventOrName.payload;
+    }
+
     await trx
       .insertInto('outbox_events')
       .values({
         id,
-        topic: event.topic,
-        event_name: event.eventName,
-        payload: JSON.stringify(event.payload),
+        topic,
+        event_name: eventName,
+        payload: JSON.stringify(eventPayload),
         status: 'PENDING',
         retry_count: 0,
         created_at: new Date(),

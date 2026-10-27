@@ -31,4 +31,12 @@ export class RequestContext {
   static getActorRole(): string | undefined {
     return this.storage.getStore()?.actorRole;
   }
+
+  static getUserId(): string | undefined {
+    return this.getActorId();
+  }
+
+  static getRole(): string | undefined {
+    return this.getActorRole();
+  }
 }

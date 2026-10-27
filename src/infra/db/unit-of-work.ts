@@ -38,4 +38,8 @@ export class UnitOfWork {
       }
     }
   }
+
+  async withTransaction<T>(work: (trx: DatabaseTransaction) => Promise<T>): Promise<T> {
+    return this.executeTransaction(work);
+  }
 }

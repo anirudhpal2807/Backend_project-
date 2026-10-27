@@ -1,4 +1,6 @@
-import { Generated, ColumnType } from 'kysely';
+import { Generated, ColumnType, Transaction } from 'kysely';
+
+export type DatabaseTransaction = Transaction<Database>;
 
 export type UserRole = 'PATIENT' | 'DOCTOR' | 'ADMIN' | 'AUDITOR';
 export type DoctorStatus = 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED';
