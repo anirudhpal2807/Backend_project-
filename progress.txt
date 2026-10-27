@@ -1,0 +1,80 @@
+================================================================================
+AMRUTAM TELEMEDICINE BACKEND — PROGRESS LOG
+================================================================================
+RULES (read before writing):
+  1. APPEND-ONLY. Never edit, reorder or delete previous entries. If an earlier
+     entry was wrong, add a new CORRECTION entry that references its Entry #.
+  2. Add one entry after EVERY completed task or milestone (and when blocked).
+  3. Timestamps: ISO-8601 with timezone, e.g. 2026-10-27T14:32:00+05:30.
+  4. Be specific: task IDs, files, endpoints, commands, measured numbers.
+  5. Keep tasks.md in sync in the same working session.
+
+ENTRY FORMAT (copy this block for every new entry):
+--------------------------------------------------------------------------------
+[ENTRY #NNN] <ISO-8601 timestamp>
+Task(s):    T-xxx, T-yyy  (title)
+Phase:      <phase number and name>
+Status:     DONE | PARTIAL | BLOCKED | CORRECTION
+
+Completed:
+  - <what was finished, with file/endpoint/commit references>
+
+Verification:
+  - <commands run and result summary, e.g. "npm test: 142 passed, coverage 86%">
+
+Issues encountered:
+  - <problem, root cause, how resolved; or "none">
+
+Decisions made:
+  - <decision + rationale + ADR link if any; or "none">
+
+Next:
+  - <next task ID(s) and the immediate first step>
+--------------------------------------------------------------------------------
+
+================================================================================
+LOG BEGINS
+================================================================================
+
+[ENTRY #001] 2026-10-27T00:00:00+05:30
+Task(s):    T-001 (Project documentation baseline)
+Phase:      0 — Foundation and Planning
+Status:     DONE
+
+Completed:
+  - Analysed the Backend Developer Assignment PDF (deliverables, scope, system
+    requirements, architecture tasks, security, data model, rubric).
+  - Created prd.md (goals, personas, functional and non-functional requirements,
+    constraints, success criteria, rubric mapping).
+  - Created prompt.md (agent operating guide, conventions, security rules,
+    testing standards, record-keeping rules).
+  - Created tasks.md (phased task tracker with priorities and dependencies).
+  - Created this progress.txt with the mandatory entry format.
+
+Verification:
+  - Documents cross-checked against every bullet in the assignment PDF
+    (deliverables 1–7, core workflows, NFRs, architecture tasks 1–9,
+    security items, core tables, rubric, auto-fail conditions).
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Stack fixed to Node.js 20 + TypeScript + NestJS (Fastify), PostgreSQL 16,
+    Redis 7, BullMQ, Terraform (AWS), GitHub Actions (PRD §3, D1–D9).
+  - Modular monolith + separate worker process instead of microservices to fit
+    the 4–5 day budget while still demonstrating modular DI design.
+  - DB constraints (exclusion constraint, partial unique index) are the
+    correctness guard against double-booking; Redis is only an optimization.
+  - Idempotency and security treated as P0 release gates because the rubric
+    states the submission FAILS if either is missing.
+  - Open questions (PRD §11) resolved with stated assumptions; will be turned
+    into ADRs when first implemented.
+
+Next:
+  - T-002 Initialise git repo, .gitignore, .editorconfig and conventional
+    commit tooling; then T-003 scaffold the NestJS project.
+
+--------------------------------------------------------------------------------
+(Append new entries below this line)
+--------------------------------------------------------------------------------
