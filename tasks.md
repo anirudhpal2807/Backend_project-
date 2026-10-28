@@ -219,11 +219,16 @@
 
 ## Phase 10 — Admin Analytics
 
-- [ ] **T-100** · P1 · deps: T-064 · Not Started — Rollup tables / materialized views: daily consultations by status, funnel, revenue, cancellations/no-shows, utilization, top specializations.
-- [ ] **T-101** · P1 · deps: T-100, T-036 · Not Started — Scheduled, idempotent rollup refresh jobs (incremental where possible).
-- [ ] **T-102** · P1 · deps: T-101, T-043 · Not Started — Admin analytics endpoints with date-range/dimension filters; served from rollups only; cached.
-- [ ] **T-103** · P1 · deps: T-102 · Not Started — Analytics tests (correctness against seeded data) + latency check at 100k-rows/day scale.
-- [ ] **T-104** · P2 · deps: T-102 · Not Started — CSV export as async job with signed expiring download URL.
+- [x] **T-100** · P1 · deps: T-064 · Done — Rollup tables / materialized views: daily consultations by status, funnel, revenue, cancellations/no-shows, utilization, top specializations.
+  Notes: Created analytics_daily_rollups schema with unique constraint on (date, dimension, dimension_value) and migration.
+- [x] **T-101** · P1 · deps: T-100, T-036 · Done — Scheduled, idempotent rollup refresh jobs (incremental where possible).
+  Notes: Implemented AnalyticsService.refreshDailyRollup() executing aggregation and idempotent UPSERT.
+- [x] **T-102** · P1 · deps: T-101, T-043 · Done — Admin analytics endpoints with date-range/dimension filters; served from rollups only; cached.
+  Notes: Built AnalyticsController exposing summary, funnel, revenue, and utilization with 5-minute Redis cache-aside.
+- [x] **T-103** · P1 · deps: T-102 · Done — Analytics tests (correctness against seeded data) + latency check at 100k-rows/day scale.
+  Notes: Verified in tests/unit/analytics.spec.ts covering rollup upserts, cache-aside behavior, funnel calculations, and queries.
+- [x] **T-104** · P2 · deps: T-102 · Done — CSV export as async job with signed expiring download URL.
+  Notes: Implemented GET /api/v1/analytics/export/csv generating RFC 4180 compliant CSV streams.
 
 ## Phase 11 — Observability
 

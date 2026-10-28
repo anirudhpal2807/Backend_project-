@@ -212,6 +212,23 @@ export interface MfaBackupCodesTable {
   created_at: Generated<Date>;
 }
 
+export interface AnalyticsDailyRollupsTable {
+  id: Generated<string>;
+  date: string;
+  dimension: Generated<string>;
+  dimension_value: Generated<string>;
+  total_slots: Generated<number>;
+  booked_slots: Generated<number>;
+  completed_consultations: Generated<number>;
+  cancelled_consultations: Generated<number>;
+  no_show_consultations: Generated<number>;
+  total_revenue_inr: Generated<number>;
+  refunded_amount_inr: Generated<number>;
+  utilization_rate: Generated<number>;
+  created_at: Generated<Date>;
+  updated_at: Generated<Date>;
+}
+
 export interface Database {
   users: UsersTable;
   user_roles: UserRolesTable;
@@ -231,4 +248,5 @@ export interface Database {
   refresh_tokens: RefreshTokensTable;
   mfa_factors: MfaFactorsTable;
   mfa_backup_codes: MfaBackupCodesTable;
+  analytics_daily_rollups: AnalyticsDailyRollupsTable;
 }

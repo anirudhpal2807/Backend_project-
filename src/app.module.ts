@@ -16,6 +16,7 @@ import { BookingsModule } from './modules/bookings/bookings.module';
 import { ConsultationsModule } from './modules/consultations/consultations.module';
 import { PrescriptionsModule } from './modules/prescriptions/prescriptions.module';
 import { AuditModule } from './modules/audit/audit.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
 import { IdempotencyInterceptor } from './common/idempotency/idempotency.interceptor';
@@ -38,6 +39,7 @@ import { IdempotencyInterceptor } from './common/idempotency/idempotency.interce
     ConsultationsModule,
     PrescriptionsModule,
     AuditModule,
+    AnalyticsModule,
   ],
   providers: [
     {

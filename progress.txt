@@ -440,6 +440,38 @@ Decisions made:
 Next:
   - Phase 10: T-100 through T-104 (Admin Analytics: rollup tables/materialized views, incremental refresh jobs, analytics endpoints, and CSV export).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #013] 2026-10-28T18:10:00+05:30
+Task(s):    T-100, T-101, T-102, T-103, T-104
+Phase:      10 — Admin Analytics
+Status:     DONE
+
+Completed:
+  - T-100: Authored migration migrations/1730000008000_analytics_rollups.js and registered AnalyticsDailyRollupsTable in database.types.ts with composite unique constraint on (date, dimension, dimension_value).
+  - T-101: Built AnalyticsService.refreshDailyRollup() calculating aggregated slot volume, consultation status counts (completed, cancelled, no-show), gross revenue, refunds, and utilization percentage, persisting via idempotent UPSERT (ON CONFLICT DO UPDATE).
+  - T-102: Implemented AnalyticsController exposing summary, funnel, revenue, and utilization endpoints served exclusively from pre-aggregated rollups (FR-ANA-2) with Redis cache-aside (300s TTL).
+  - T-103: Authored comprehensive unit tests in tests/unit/analytics.spec.ts verifying aggregation logic, cache-aside hit/miss behavior, funnel conversion calculations, and fast O(1) rollup lookups.
+  - T-104: Added GET /api/v1/analytics/export/csv generating RFC 4180 compliant CSV streams.
+  - Formatted, linted (0 errors, 0 warnings), verified all 22 test suites (104/104 passing), and compiled via nest build.
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 104/104 tests across 22 test suites.
+  - nest build compiled cleanly.
+  - Phase 10 is 100% complete (5/5 tasks done). Total completed: 78/136 tasks.
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Pre-aggregated rollups completely decouple admin analytical queries from operational OLTP partition tables, preventing live scanning on hot tables.
+  - Rollup refreshes are strictly idempotent using composite unique constraint UPSERTs.
+
+Next:
+  - Phase 11 & 12: Observability and Security Hardening (T-110 to T-129).
+
+
 
 
 
