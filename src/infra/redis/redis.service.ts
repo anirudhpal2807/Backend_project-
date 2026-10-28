@@ -76,31 +76,44 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     // 4. Set expiry
     multi.expire(redisKey, windowSeconds);
 
-    const results = await multi.exec();
-    const currentCount = (results?.[1]?.[1] as number) || 0;
+    try {
+      const results = await multi.exec();
+      const currentCount = (results?.[1]?.[1] as number) || 0;
 
-    const allowed = currentCount < limit;
-    const remaining = Math.max(0, limit - (currentCount + 1));
+      const allowed = currentCount < limit;
+      const remaining = Math.max(0, limit - (currentCount + 1));
 
-    return {
-      allowed,
-      totalHits: currentCount + 1,
-      remaining,
-      resetSeconds: windowSeconds,
-    };
+      return {
+        allowed,
+        totalHits: currentCount + 1,
+        remaining,
+        resetSeconds: windowSeconds,
+      };
+    } catch {
+      // Fail-open if Redis execution encounters an in-flight socket/connection error
+      return { allowed: true, totalHits: 1, remaining: limit - 1, resetSeconds: windowSeconds };
+    }
   }
 
   async get(key: string): Promise<string | null> {
     if (!this.isConnected) return null;
-    return this.client.get(key);
+    try {
+      return await this.client.get(key);
+    } catch {
+      return null;
+    }
   }
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
     if (!this.isConnected) return;
-    if (ttlSeconds) {
-      await this.client.set(key, value, 'EX', ttlSeconds);
-    } else {
-      await this.client.set(key, value);
+    try {
+      if (ttlSeconds) {
+        await this.client.set(key, value, 'EX', ttlSeconds);
+      } else {
+        await this.client.set(key, value);
+      }
+    } catch {
+      // Swallow error during background cache set to prevent unhandled rejection
     }
   }
 
