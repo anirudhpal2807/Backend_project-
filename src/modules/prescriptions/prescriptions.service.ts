@@ -1,10 +1,11 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus, Optional } from '@nestjs/common';
 import { DatabaseService } from '../../infra/db/database.service';
 import { UnitOfWork } from '../../infra/db/unit-of-work';
 import { CryptoService } from '../../infra/crypto/crypto.service';
 import { OutboxService } from '../../infra/queue/outbox.service';
 import { IIdGenerator } from '../../common/id/id-generator.interface';
 import { AppLoggerService } from '../../common/logger/app-logger.service';
+import { AuditService } from '../audit/audit.service';
 import {
   CreatePrescriptionDto,
   AmendPrescriptionDto,
@@ -22,6 +23,7 @@ export class PrescriptionsService {
     private readonly outboxService: OutboxService,
     private readonly idGenerator: IIdGenerator,
     private readonly logger: AppLoggerService,
+    @Optional() private readonly auditService?: AuditService,
   ) {}
 
   /**
@@ -113,6 +115,25 @@ export class PrescriptionsService {
           version: 1,
         },
       );
+
+      if (this.auditService) {
+        await this.auditService.record(
+          {
+            actorId: doctorUserId,
+            actorRole: 'DOCTOR',
+            action: 'prescription.created',
+            resourceType: 'prescription',
+            resourceId: prescriptionId,
+            outcome: 'SUCCESS',
+            metadata: {
+              consultation_id: consultation.id,
+              version: 1,
+              item_count: dto.items.length,
+            },
+          },
+          trx,
+        );
+      }
 
       this.logger.log(`Prescription ${prescriptionId} (v1) created by doctor ${doctor.id}`);
 
@@ -208,6 +229,25 @@ export class PrescriptionsService {
         },
       );
 
+      if (this.auditService) {
+        await this.auditService.record(
+          {
+            actorId: doctorUserId,
+            actorRole: 'DOCTOR',
+            action: 'prescription.amended',
+            resourceType: 'prescription',
+            resourceId: newPrescriptionId,
+            outcome: 'SUCCESS',
+            metadata: {
+              previous_id: existing.id,
+              version: newVersion,
+              reason: dto.reason,
+            },
+          },
+          trx,
+        );
+      }
+
       this.logger.log(`Prescription amended: created v${newVersion} (${newPrescriptionId})`);
 
       return {
@@ -266,6 +306,21 @@ export class PrescriptionsService {
     }
 
     // Record audit trail of prescription read (T-073)
+    if (this.auditService) {
+      await this.auditService.record({
+        actorId,
+        actorRole,
+        action: 'prescription.read',
+        resourceType: 'prescription',
+        resourceId: prescription.id,
+        outcome: 'SUCCESS',
+        metadata: {
+          version: prescription.version,
+          is_admin_or_auditor: actorRole === 'ADMIN' || actorRole === 'AUDITOR',
+        },
+      });
+    }
+
     this.logger.log(
       `Prescription ${prescription.id} read by actor ${actorId} (role: ${actorRole})`,
     );

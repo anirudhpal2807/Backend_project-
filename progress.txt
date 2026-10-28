@@ -409,6 +409,38 @@ Decisions made:
 Next:
   - Phase 9: T-090 through T-094 (Audit and Compliance: cryptographic hash-chained audit logger, audit interceptor/decorators, audit query API with role guards, tamper detection tests, and data retention policies).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #012] 2026-10-28T17:30:00+05:30
+Task(s):    T-090, T-091, T-092, T-093, T-094
+Phase:      9 — Audit and Compliance
+Status:     DONE
+
+Completed:
+  - T-090: Implemented AuditService with SHA-256 cryptographic hash-chaining, genesis hash (64 zeroes), transactional participation, and automated redaction of sensitive credentials and PHI.
+  - T-091: Built @Audited decorator and AuditInterceptor for declarative endpoint auditing, wired explicit audit trail recording into consultations (started, notes updated, completed) and prescriptions (created, amended, read), and created comprehensive checklist test in tests/unit/audit-coverage.spec.ts.
+  - T-092: Created AuditController exposing GET /api/v1/audit/logs (with keyset cursor pagination), POST /api/v1/audit/verify-chain (verifying cryptographic hash chain integrity and tamper detection), and GET /api/v1/audit/export (with SHA-256 payload checksum), protected under @Roles('ADMIN', 'AUDITOR').
+  - T-093: Implemented tamper detection tests in tests/unit/audit.spec.ts proving database triggers block UPDATE/DELETE on audit_logs and that modified prev_hash, tampered payload, or forged hash are immediately caught.
+  - T-094: Built AuditService.anonymizeUser() implementing the GDPR / HIPAA Right to Erasure flow (sanitizing profile PII while preserving ledger tokens) and documented retention schedules in docs/security/retention.md.
+  - Formatted, linted (0 errors, 0 warnings), verified all 21 test suites (100/100 tests passing), and compiled via nest build.
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 100/100 tests across 21 test suites.
+  - nest build compiled cleanly.
+  - Phase 9 is 100% complete (5/5 tasks done). Total completed: 73/136 tasks.
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Canonical hash input includes sorted metadata SHA-256 hash to detect any metadata tampering without storing unencrypted PHI.
+  - AuditModule declared as @Global() and AuditService injected as optional dependency to avoid breaking existing unit tests.
+
+Next:
+  - Phase 10: T-100 through T-104 (Admin Analytics: rollup tables/materialized views, incremental refresh jobs, analytics endpoints, and CSV export).
+
+
 
 
 

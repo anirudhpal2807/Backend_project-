@@ -206,11 +206,16 @@
 
 ## Phase 9 — Audit and Compliance
 
-- [ ] **T-090** · P0 · deps: T-025, T-035 · Not Started — Audit service: written **in the same transaction** as the change, per-partition **hash chain**, never stores raw PHI (hashes/IDs only).
-- [ ] **T-091** · P0 · deps: T-090 · Not Started — Audit coverage: decorator/interceptor + explicit calls for auth events, role changes, bookings, payments, consultation transitions, prescription create/read, admin actions. Coverage checklist test.
-- [ ] **T-092** · P0 · deps: T-090, T-043 · Not Started — Audit query API (ADMIN/AUDITOR, filters, cursor) + chain-verification endpoint/job.
-- [ ] **T-093** · P0 · deps: T-090 · Not Started — Tamper tests: `UPDATE`/`DELETE` on `audit_logs` blocked for the app role and by trigger; verification detects a forced modification.
-- [ ] **T-094** · P1 · deps: T-090 · Not Started — Retention and erasure/anonymization policy: implement anonymization flow and document PHI retention rules (`docs/security/retention.md`).
+- [x] **T-090** · P0 · deps: T-025, T-035 · Done — Audit service: written **in the same transaction** as the change, per-partition **hash chain**, never stores raw PHI (hashes/IDs only).
+  Notes: Implemented in AuditService with transactional support, SHA-256 hash chaining, genesis hash, and PHI/PII redaction.
+- [x] **T-091** · P0 · deps: T-090 · Done — Audit coverage: decorator/interceptor + explicit calls for auth events, role changes, bookings, payments, consultation transitions, prescription create/read, admin actions. Coverage checklist test.
+  Notes: Implemented @Audited decorator, AuditInterceptor, explicit audit integration across consultations & prescriptions, and coverage test in tests/unit/audit-coverage.spec.ts.
+- [x] **T-092** · P0 · deps: T-090, T-043 · Done — Audit query API (ADMIN/AUDITOR, filters, cursor) + chain-verification endpoint/job.
+  Notes: Built AuditController with GET /api/v1/audit/logs (keyset pagination), POST /api/v1/audit/verify-chain, and GET /api/v1/audit/export.
+- [x] **T-093** · P0 · deps: T-090 · Done — Tamper tests: `UPDATE`/`DELETE` on `audit_logs` blocked for the app role and by trigger; verification detects a forced modification.
+  Notes: Verified trigger-level immutability enforcement and cryptographic chain tamper detection in tests/unit/audit.spec.ts.
+- [x] **T-094** · P1 · deps: T-090 · Done — Retention and erasure/anonymization policy: implement anonymization flow and document PHI retention rules (`docs/security/retention.md`).
+  Notes: Built AuditService.anonymizeUser() flow and published retention & erasure policy in docs/security/retention.md.
 
 ## Phase 10 — Admin Analytics
 

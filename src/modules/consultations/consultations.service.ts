@@ -1,4 +1,4 @@
-import { Injectable, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpStatus, Optional } from '@nestjs/common';
 import { DatabaseService } from '../../infra/db/database.service';
 import { UnitOfWork } from '../../infra/db/unit-of-work';
 import { CryptoService } from '../../infra/crypto/crypto.service';
@@ -9,6 +9,7 @@ import { UpdateClinicalNotesDto, CompleteConsultationDto } from './dto/consultat
 import { AppException } from '../../common/errors/app-exception';
 import { ErrorCode } from '../../common/errors/error-codes';
 import { ConsultationStateMachine } from '../bookings/domain/consultation-state-machine';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class ConsultationsService {
@@ -19,6 +20,7 @@ export class ConsultationsService {
     private readonly outboxService: OutboxService,
     private readonly videoProvider: MockVideoProvider,
     private readonly logger: AppLoggerService,
+    @Optional() private readonly auditService?: AuditService,
   ) {}
 
   /**
@@ -92,6 +94,23 @@ export class ConsultationsService {
           videoRoom: videoSession.roomName,
         },
       );
+
+      if (this.auditService) {
+        await this.auditService.record(
+          {
+            actorId: doctorUserId,
+            actorRole: 'DOCTOR',
+            action: 'consultation.started',
+            resourceType: 'consultation',
+            resourceId: consultation.id,
+            outcome: 'SUCCESS',
+            metadata: {
+              room_name: videoSession.roomName,
+            },
+          },
+          trx,
+        );
+      }
 
       this.logger.log(`Consultation ${consultation.id} started by doctor ${doctor.id}`);
 
@@ -189,6 +208,23 @@ export class ConsultationsService {
         },
       );
 
+      if (this.auditService) {
+        await this.auditService.record(
+          {
+            actorId: doctorUserId,
+            actorRole: 'DOCTOR',
+            action: 'consultation.notes_updated',
+            resourceType: 'consultation',
+            resourceId: consultationId,
+            outcome: 'SUCCESS',
+            metadata: {
+              version: consultation.version + 1,
+            },
+          },
+          trx,
+        );
+      }
+
       return {
         consultation_id: consultationId,
         version: consultation.version + 1,
@@ -267,6 +303,23 @@ export class ConsultationsService {
           patientId: consultation.patient_id,
         },
       );
+
+      if (this.auditService) {
+        await this.auditService.record(
+          {
+            actorId: doctorUserId,
+            actorRole: 'DOCTOR',
+            action: 'consultation.completed',
+            resourceType: 'consultation',
+            resourceId: consultation.id,
+            outcome: 'SUCCESS',
+            metadata: {
+              patient_id: consultation.patient_id,
+            },
+          },
+          trx,
+        );
+      }
 
       this.logger.log(`Consultation ${consultation.id} marked COMPLETED by doctor ${doctor.id}`);
 
