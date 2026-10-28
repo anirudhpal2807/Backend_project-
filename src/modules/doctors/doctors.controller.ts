@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DoctorsService } from './doctors.service';
+import { DoctorsSearchService } from './doctors-search.service';
 import { OnboardDoctorDto, AdminVerifyDoctorDto } from './dto/doctor.dto';
+import { SearchDoctorQuerySchema, SearchDoctorQueryDto } from './dto/search-doctor.dto';
 import { JwtAuthGuard, AuthenticatedUser } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -10,7 +12,20 @@ import { FastifyRequest } from 'fastify';
 @ApiTags('Doctors')
 @Controller('doctors')
 export class DoctorsController {
-  constructor(private readonly doctorsService: DoctorsService) {}
+  constructor(
+    private readonly doctorsService: DoctorsService,
+    private readonly searchService: DoctorsSearchService,
+  ) {}
+
+  @Get('search')
+  @ApiOperation({
+    summary: 'Search verified doctors with FTS, availability window, and Redis cache',
+  })
+  @ApiResponse({ status: 200, description: 'Matching doctors returned' })
+  async search(@Query() query: SearchDoctorQueryDto) {
+    const parseResult = SearchDoctorQuerySchema.parse(query);
+    return await this.searchService.searchDoctors(parseResult);
+  }
 
   @Post('onboard')
   @UseGuards(JwtAuthGuard, RolesGuard)

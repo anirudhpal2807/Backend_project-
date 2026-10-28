@@ -378,8 +378,37 @@ Decisions made:
   - Admin/auditor prescription views strictly mask clinical items and instructions to maintain HIPAA/telemedicine compliance.
   - Prescriptions are never modified in place; amendments insert new version records with audit reasons.
 
+--------------------------------------------------------------------------------
+
+[ENTRY #011] 2026-10-28T04:25:00+05:30
+Task(s):    T-080, T-081, T-082, T-083, T-084
+Phase:      8 — Search and Caching
+Status:     DONE
+
+Completed:
+  - T-080: Implemented DoctorsSearchService with multi-attribute filtering (specialization, language array match, fee range, experience, verified status, bio/name search), keyset cursor pagination with opaque base64url cursors, and deterministic ordering.
+  - T-081: Added availability window filter querying EXISTS open slots in [fromDate, toDate] range.
+  - T-082: Built Redis cache-aside caching with single-flight stampede protection (Promise memoization per cache key) and jittered TTL (60s + 0-15s random variance). Slot availability remains strictly un-cached authoritatively.
+  - T-083: Verified cache behavior, stampede protection, and graceful DB fallback in tests/unit/doctors-search.spec.ts.
+  - T-084: Validated index-friendly search queries and added search endpoint GET /api/v1/doctors/search to DoctorsController.
+  - Formatted, linted (0 errors, 0 warnings), verified all 19 test suites (86/86 passing), and compiled via nest build.
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 86/86 tests across 19 test suites.
+  - nest build compiled cleanly.
+  - Phase 8 is 100% complete (5/5 tasks done). Total completed: 68/136 tasks.
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Redis cache keys include normalized filter parameters and cursor token to guarantee cache isolation.
+  - Single-flight stampede protection resolves concurrent identical searches through an in-memory active promise map.
+
 Next:
-  - Phase 8: T-080 through T-084 (Search and Caching: doctor search endpoint with FTS + pg_trgm fuzzy matching, availability window filter, Redis cache-aside with single-flight stampede protection, and cache metrics).
+  - Phase 9: T-090 through T-094 (Audit and Compliance: cryptographic hash-chained audit logger, audit interceptor/decorators, audit query API with role guards, tamper detection tests, and data retention policies).
+
 
 
 

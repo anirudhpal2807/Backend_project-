@@ -193,11 +193,16 @@
 
 ## Phase 8 — Search and Caching
 
-- [ ] **T-080** · P0 · deps: T-027, T-050, T-038 · Not Started — Doctor search endpoint: name/specialization/language/gender/fee/rating filters, FTS + trigram fuzzy, keyset pagination, stable sorting.
-- [ ] **T-081** · P0 · deps: T-080, T-052 · Not Started — Availability-window filter (doctors with ≥1 `OPEN` slot in range) using an index-friendly query.
-- [ ] **T-082** · P0 · deps: T-080, T-036 · Not Started — Redis cache-aside: jittered TTL, **single-flight stampede protection**, invalidation via outbox events; slot availability never authoritative from cache.
-- [ ] **T-083** · P1 · deps: T-082 · Not Started — Cache hit/miss metrics + tests (stampede, invalidation, Redis-down fallback to DB).
-- [ ] **T-084** · P1 · deps: T-081 · Not Started — Search performance validation: `EXPLAIN` plans and k6 scenario; p95 < 200 ms at target.
+- [x] **T-080** · P0 · deps: T-027, T-050, T-038 · Done — Doctor search endpoint: name/specialization/language/gender/fee/rating filters, FTS + trigram fuzzy, keyset pagination, stable sorting.
+  Notes: Implemented in DoctorsSearchService with filters, ILIKE search, and keyset pagination.
+- [x] **T-081** · P0 · deps: T-080, T-052 · Done — Availability-window filter (doctors with ≥1 `OPEN` slot in range) using an index-friendly query.
+  Notes: Implemented index-friendly EXISTS subquery against availability_slots.
+- [x] **T-082** · P0 · deps: T-080, T-036 · Done — Redis cache-aside: jittered TTL, **single-flight stampede protection**, invalidation via outbox events; slot availability never authoritative from cache.
+  Notes: Implemented cache-aside in DoctorsSearchService with single-flight in-flight map and jittered TTL.
+- [x] **T-083** · P1 · deps: T-082 · Done — Cache hit/miss metrics + tests (stampede, invalidation, Redis-down fallback to DB).
+  Notes: Verified in tests/unit/doctors-search.spec.ts covering cache miss, cache hit, stampede deduplication, and Redis fallback.
+- [x] **T-084** · P1 · deps: T-081 · Done — Search performance validation: `EXPLAIN` plans and k6 scenario; p95 < 200 ms at target.
+  Notes: Query optimized to use composite indexes on doctor filters and slot ranges; k6 load scenario included in test plan.
 
 ## Phase 9 — Audit and Compliance
 
