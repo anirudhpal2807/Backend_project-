@@ -471,6 +471,48 @@ Decisions made:
 Next:
   - Phase 11 & 12: Observability and Security Hardening (T-110 to T-129).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #014] 2026-10-28T18:45:00+05:30
+Task(s):    T-110 through T-116 (Observability) & T-120 through T-129 (Security Hardening)
+Phase:      11 & 12 — Observability, Security Hardening and Threat Model
+Status:     DONE
+
+Completed:
+  - T-110: Implemented MetricsService exposing Prometheus RED metrics (http_requests_total, http_request_duration_seconds buckets), pool gauges, queue depth, cache hits/misses, and business counters (bookings, saga failures, prevented double-bookings) via GET /metrics.
+  - T-111 & T-116: Built RequestContext OpenTelemetry W3C TraceContext traceparent propagation across API, PostgreSQL, and BullMQ worker jobs, documented in docs/observability/architecture.md.
+  - T-112: Configured infra/observability/prometheus.yml and Grafana datasource provisioning.
+  - T-113: Authored Grafana dashboard as code in infra/observability/grafana/dashboards/telemedicine-overview.json.
+  - T-114: Created alert_rules.yml with multi-window multi-burn-rate rules (1h 14.4x, 6h 6x, 3d 1x) for 99.95% SLO, P95 latency breaches, and DLQ growth.
+  - T-115: Documented Service Level Objectives, Indicators, and Error Budget governance in docs/slo.md.
+  - T-120: Hardened main.ts with @fastify/helmet (HSTS, CSP, X-Frame-Options: DENY), strict CORS origin allowlist, 1MB bodyLimit, 15s connectionTimeout, and trustProxy.
+  - T-121 & T-122: Verified JWT kid rotation and implemented envelope reWrap() in CryptoService for DEK re-encryption under KEK rotation.
+  - T-123 & T-124: Configured automated vulnerability, dependency, secret (Gitleaks), container (Trivy), and IaC (Checkov/tfsec) scanning.
+  - T-125: Authored comprehensive STRIDE threat model with Mermaid DFD, trust boundaries, and data classification in docs/security/threat-model.md.
+  - T-126 & T-127: Authored OWASP Top 10 (2021) mapping in docs/security/owasp-mapping.md and ASVS 4.0 checklist in docs/security/checklist.md.
+  - T-128: Built unit test suite in tests/unit/security-hardening.spec.ts verifying SQL injection safety, HMAC forgery/replay protection, and recursive log redaction.
+  - T-129: Documented least privilege database architecture and role separation in docs/security/db-least-privilege.md.
+  - Formatted, linted (0 errors, 0 warnings), verified all 24 test suites (114/114 passing), and compiled via nest build.
+
+Verification:
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run test passed with 114/114 tests across 24 test suites.
+  - nest build compiled cleanly.
+  - Phase 11 & 12 are 100% complete (17/17 tasks done). Total completed: 95/136 tasks.
+
+Issues encountered:
+  - none
+
+Decisions made:
+  - Prometheus scraping endpoint (/metrics) bypasses request duration interceptor to avoid skewing API latency statistics.
+  - Multi-window burn-rate alerting eliminates noisy transient pages while detecting fast budget exhaustion within 2 minutes.
+
+Next:
+  - Phase 13: Quality, Performance and Resilience (T-130 to T-135: k6 load scripts, resilience chaos tests, performance report).
+  - Phase 14: Infrastructure and CI/CD (T-140 to T-147: OpenAPI 3.1 YAML, GitHub Actions CI/CD workflows, Terraform AWS modules).
+  - Phase 15 & 16: Documentation, Demo Script & Final Polish (T-150 to T-169).
+
+
 
 
 

@@ -1,0 +1,170 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "99.95% Availability SLO Error Budget Status",
+      "type": "gauge",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 - (100 * (sum(rate(amrutam_http_requests_total{status_code=~\"5..\"}[30d])) / (sum(rate(amrutam_http_requests_total[30d])) * 0.0005)))",
+          "legendFormat": "Remaining Budget %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "green", "value": 50 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "API Request Rate (RPS)",
+      "type": "timeseries",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(amrutam_http_requests_total[1m])) by (method, route)",
+          "legendFormat": "{{method}} {{route}}"
+        }
+      ]
+    },
+    {
+      "title": "HTTP Error Rate (5xx %)",
+      "type": "timeseries",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(amrutam_http_requests_total{status_code=~\"5..\"}[1m])) / sum(rate(amrutam_http_requests_total[1m]))",
+          "legendFormat": "5xx Error %"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "title": "Prevented Double Bookings (DB Exclusion)",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(amrutam_prevented_double_bookings_total)",
+          "legendFormat": "Total Prevented"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "fixedColor": "green", "mode": "fixed" } } }
+    },
+    {
+      "title": "P95 & P99 Latency by Route (Budget: P95 < 500ms write / < 200ms read)",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 5 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(amrutam_http_request_duration_seconds_bucket[5m])) by (le, route))",
+          "legendFormat": "p95 {{route}}"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(amrutam_http_request_duration_seconds_bucket[5m])) by (le, route))",
+          "legendFormat": "p99 {{route}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "PostgreSQL Connection Pool Utilization",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 5 },
+      "targets": [
+        {
+          "expr": "amrutam_db_pool_active_connections",
+          "legendFormat": "Active Connections"
+        },
+        {
+          "expr": "amrutam_db_pool_idle_connections",
+          "legendFormat": "Idle Connections"
+        }
+      ]
+    },
+    {
+      "title": "Redis Cache Hit Ratio",
+      "type": "gauge",
+      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 5 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(amrutam_cache_hits_total[5m])) / (sum(rate(amrutam_cache_hits_total[5m])) + sum(rate(amrutam_cache_misses_total[5m])))",
+          "legendFormat": "Hit Ratio %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 85 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "BullMQ Worker Queue Depth & DLQ Lag",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        {
+          "expr": "amrutam_queue_depth",
+          "legendFormat": "{{queue_name}}"
+        }
+      ]
+    },
+    {
+      "title": "Idempotent Request Replay Counter",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "sum(amrutam_idempotent_replays_total)",
+          "legendFormat": "Replayed Requests"
+        }
+      ]
+    },
+    {
+      "title": "Booking & Saga Failure Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 12 },
+      "targets": [
+        {
+          "expr": "sum(rate(amrutam_saga_failures_total[5m])) by (reason)",
+          "legendFormat": "{{reason}}"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["amrutam", "production", "slo", "healthcare"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "utc",
+  "title": "Amrutam Telemedicine Platform - Executive RED & SLO Overview",
+  "uid": "amrutam-overview"
+}

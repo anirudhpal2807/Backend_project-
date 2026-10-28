@@ -4,13 +4,52 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AppConfigService } from './infra/config/config.service';
 
+import helmet from '@fastify/helmet';
+
 async function bootstrap() {
   const adapter = new FastifyAdapter({
-    logger: false, // will use pino logger interceptor/service
+    logger: false,
+    bodyLimit: 1048576, // 1MB body limit (T-120)
+    trustProxy: true, // trust upstream ALB proxy (T-120)
+    connectionTimeout: 15000, // 15s request timeout (T-120)
+    keepAliveTimeout: 5000,
   });
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
     bufferLogs: true,
+  });
+
+  // Security Headers via Helmet (T-120)
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [`'self'`],
+        styleSrc: [`'self'`, `'unsafe-inline'`],
+        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+        scriptSrc: [`'self'`, `'unsafe-inline'`],
+      },
+    },
+    frameguard: { action: 'deny' },
+    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+  });
+
+  // Strict CORS Allowlist (T-120)
+  app.enableCors({
+    origin: [
+      'https://amrutam.global',
+      'https://app.amrutam.global',
+      'https://doctor.amrutam.global',
+      'http://localhost:3000',
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Idempotency-Key',
+      'x-request-id',
+      'traceparent',
+    ],
   });
 
   const configService = app.get(AppConfigService);

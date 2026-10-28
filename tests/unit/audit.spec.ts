@@ -21,7 +21,7 @@ describe('AuditService (Unit & Compliance Tests)', () => {
 
     mockDatabaseService = {
       get db() {
-        return mockDb;
+        return mockDb as unknown as DatabaseService['db'];
       },
     };
 

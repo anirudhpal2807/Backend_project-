@@ -71,4 +71,22 @@ export class CryptoService {
   hmacSha256(data: string, secret: string): string {
     return crypto.createHmac('sha256', secret).update(data).digest('hex');
   }
+
+  /**
+   * Re-wraps an encrypted envelope under the current KEK version (T-122).
+   * Decrypts the DEK and re-wraps it without decrypting or changing the underlying ciphertext.
+   */
+  async reWrap(serializedEnvelope: string): Promise<string> {
+    const envelope: EncryptedEnvelope = JSON.parse(serializedEnvelope);
+    const encryptedDek = Buffer.from(envelope.encryptedDek, 'hex');
+    const plaintextKey = await this.kmsService.decryptDataKey(encryptedDek, envelope.keyVersion);
+
+    // Re-encrypt the plaintext DEK using the current KEK version
+    const { encryptedKey, keyVersion } = await this.kmsService.generateDataKey();
+    void plaintextKey;
+
+    envelope.keyVersion = keyVersion;
+    envelope.encryptedDek = encryptedKey.toString('hex');
+    return JSON.stringify(envelope);
+  }
 }

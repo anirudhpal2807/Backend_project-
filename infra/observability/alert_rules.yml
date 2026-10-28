@@ -1,0 +1,116 @@
+groups:
+  - name: amrutam_slo_burn_rate_alerts
+    rules:
+      # 99.95% SLO = 0.05% error budget (0.0005)
+      # 1-hour window with 14.4x burn rate (consumes 2% of 30-day budget in 1 hour) -> Page
+      - alert: HighErrorBudgetBurnRate1h
+        expr: >-
+          (
+            sum(rate(amrutam_http_requests_total{status_code=~"5.."}[1h]))
+            /
+            sum(rate(amrutam_http_requests_total[1h]))
+          ) > (14.4 * 0.0005)
+        for: 2m
+        labels:
+          severity: critical
+          slo: "99.95%"
+        annotations:
+          summary: "Critical Error Budget Burn Rate: 14.4x over 1 hour"
+          description: "Amrutam API is burning error budget at 14.4x normal rate. 2% of budget consumed in 1h."
+
+      # 6-hour window with 6x burn rate (consumes 5% of 30-day budget in 6 hours) -> Page
+      - alert: HighErrorBudgetBurnRate6h
+        expr: >-
+          (
+            sum(rate(amrutam_http_requests_total{status_code=~"5.."}[6h]))
+            /
+            sum(rate(amrutam_http_requests_total[6h]))
+          ) > (6 * 0.0005)
+        for: 15m
+        labels:
+          severity: critical
+          slo: "99.95%"
+        annotations:
+          summary: "Critical Error Budget Burn Rate: 6x over 6 hours"
+          description: "Amrutam API is burning error budget at 6x rate over a 6h window."
+
+      # 3-day window with 1x burn rate (consumes 10% of budget in 3 days) -> Ticket
+      - alert: SlowErrorBudgetBurnRate3d
+        expr: >-
+          (
+            sum(rate(amrutam_http_requests_total{status_code=~"5.."}[3d]))
+            /
+            sum(rate(amrutam_http_requests_total[3d]))
+          ) > (1 * 0.0005)
+        for: 1h
+        labels:
+          severity: warning
+          slo: "99.95%"
+        annotations:
+          summary: "Warning: Sustained error budget burn over 3 days"
+          description: "Error budget consumption is steady and threatens 30-day compliance."
+
+  - name: amrutam_operational_and_infrastructure_alerts
+    rules:
+      # P95 Latency Breach (> 500ms write budget or > 200ms read budget)
+      - alert: HighP95Latency
+        expr: >-
+          histogram_quantile(0.95, sum(rate(amrutam_http_request_duration_seconds_bucket[5m])) by (le, route)) > 0.500
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 request latency exceeds 500ms budget"
+          description: "Route {{ $labels.route }} has p95 latency of {{ $value }}s over last 5m."
+
+      # High 5xx Server Error Spike (> 1% of traffic)
+      - alert: HighServerErrorRate
+        expr: >-
+          (
+            sum(rate(amrutam_http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(amrutam_http_requests_total[5m]))
+          ) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Server error rate exceeds 1% of total traffic"
+          description: "5xx error rate is currently {{ $value | humanizePercentage }}."
+
+      # PostgreSQL Connection Pool Saturation (> 85% capacity)
+      - alert: DatabasePoolSaturation
+        expr: >-
+          (
+            amrutam_db_pool_active_connections
+            /
+            (amrutam_db_pool_active_connections + amrutam_db_pool_idle_connections)
+          ) > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL pool capacity saturation > 85%"
+          description: "Active DB connections are saturating the available pool."
+
+      # Dead Letter Queue (DLQ) Growth
+      - alert: DeadLetterQueueNotEmpty
+        expr: >-
+          amrutam_queue_depth{queue_name=~".*dlq.*"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Dead Letter Queue has unhandled failed jobs"
+          description: "Queue {{ $labels.queue_name }} has {{ $value }} dead letters requiring inspection."
+
+      # Booking Saga Failure Anomaly
+      - alert: SagaFailureAnomaly
+        expr: >-
+          sum(rate(amrutam_saga_failures_total[5m])) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High rate of booking saga compensation events"
+          description: "Saga compensation rate is {{ $value }} failures/sec over 5m."

@@ -36,7 +36,7 @@ describe('Audit Coverage Checklist (T-091)', () => {
 
     mockDatabaseService = {
       get db() {
-        return mockDb;
+        return mockDb as unknown as DatabaseService['db'];
       },
     };
 
@@ -94,7 +94,7 @@ describe('Audit Coverage Checklist (T-091)', () => {
         expect(recorded.action).toBe(action);
         expect(recorded.prev_hash).toBe(prevHash);
         expect(recorded.hash).toHaveLength(64);
-        prevHash = recorded.hash;
+        prevHash = String(recorded.hash);
       }
     }
 
@@ -122,7 +122,7 @@ describe('Audit Coverage Checklist (T-091)', () => {
     });
 
     const recorded = recordedEntries[0];
-    const metadataParsed = JSON.parse(recorded.metadata);
+    const metadataParsed = JSON.parse(String(recorded.metadata));
 
     expect(metadataParsed.password).toBe('[REDACTED]');
     expect(metadataParsed.token).toBe('[REDACTED]');
