@@ -12,18 +12,34 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly configService: AppConfigService) {}
 
   onModuleInit() {
-    this.pool = new Pool({
-      host: this.configService.get('DB_HOST'),
-      port: this.configService.get('DB_PORT'),
-      database: this.configService.get('DB_NAME'),
-      user: this.configService.get('DB_USER'),
-      password: this.configService.get('DB_PASSWORD'),
-      min: this.configService.get('DB_POOL_MIN'),
-      max: this.configService.get('DB_POOL_MAX'),
-      statement_timeout: this.configService.get('DB_STATEMENT_TIMEOUT_MS'),
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-    });
+    const dbUrl = this.configService.get('DATABASE_URL');
+    const sslFlag = this.configService.get('DB_SSL');
+    const isNeon = dbUrl?.includes('neon.tech') || dbUrl?.includes('sslmode=require');
+    const useSsl = sslFlag || isNeon ? { rejectUnauthorized: false } : undefined;
+
+    this.pool = dbUrl
+      ? new Pool({
+          connectionString: dbUrl,
+          min: this.configService.get('DB_POOL_MIN'),
+          max: this.configService.get('DB_POOL_MAX'),
+          statement_timeout: this.configService.get('DB_STATEMENT_TIMEOUT_MS'),
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000,
+          ssl: useSsl,
+        })
+      : new Pool({
+          host: this.configService.get('DB_HOST'),
+          port: this.configService.get('DB_PORT'),
+          database: this.configService.get('DB_NAME'),
+          user: this.configService.get('DB_USER'),
+          password: this.configService.get('DB_PASSWORD'),
+          min: this.configService.get('DB_POOL_MIN'),
+          max: this.configService.get('DB_POOL_MAX'),
+          statement_timeout: this.configService.get('DB_STATEMENT_TIMEOUT_MS'),
+          idleTimeoutMillis: 30000,
+          connectionTimeoutMillis: 10000,
+          ssl: useSsl,
+        });
 
     const dialect = new PostgresDialect({
       pool: this.pool,

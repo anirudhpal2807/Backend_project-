@@ -7,17 +7,20 @@ export const EnvSchema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 
   // Database
-  DB_HOST: z.string().min(1, 'DB_HOST is required'),
+  DATABASE_URL: z.string().optional(),
+  DB_SSL: z.coerce.boolean().optional().default(false),
+  DB_HOST: z.string().optional().default('localhost'),
   DB_PORT: z.coerce.number().default(5432),
-  DB_NAME: z.string().min(1, 'DB_NAME is required'),
-  DB_USER: z.string().min(1, 'DB_USER is required'),
+  DB_NAME: z.string().optional().default('amrutam_telemed'),
+  DB_USER: z.string().optional().default('postgres'),
   DB_PASSWORD: z.string().default(''),
   DB_POOL_MIN: z.coerce.number().default(2),
   DB_POOL_MAX: z.coerce.number().default(20),
   DB_STATEMENT_TIMEOUT_MS: z.coerce.number().default(5000),
 
   // Redis
-  REDIS_HOST: z.string().min(1, 'REDIS_HOST is required'),
+  REDIS_URL: z.string().optional(),
+  REDIS_HOST: z.string().optional().default('localhost'),
   REDIS_PORT: z.coerce.number().default(6379),
   REDIS_PASSWORD: z.string().optional().default(''),
 
