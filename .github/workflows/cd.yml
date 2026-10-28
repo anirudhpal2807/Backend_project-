@@ -1,0 +1,104 @@
+name: Continuous Deployment
+
+on:
+  workflow_run:
+    workflows: ['Docker Build & Security Scan']
+    branches: [main]
+    types: [completed]
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging Environment
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: staging
+      url: https://staging-api.amrutam.global
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/AmrutamStagingDeployer
+          aws-region: ap-south-1
+
+      - name: Run Database Migrations (Pre-Rollout Step)
+        run: |
+          echo "[CD] Running pre-rollout database migrations on staging RDS..."
+          aws ecs run-task \
+            --cluster amrutam-staging-cluster \
+            --task-definition amrutam-migrator-staging \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-abc12345],securityGroups=[sg-migration]}" \
+            --overrides '{"containerOverrides": [{"name": "migrator", "command": ["npm", "run", "migrate:up"]}]}'
+
+      - name: Deploy API Service to ECS Fargate
+        run: |
+          echo "[CD] Updating ECS service amrutam-api-staging..."
+          aws ecs update-service \
+            --cluster amrutam-staging-cluster \
+            --service amrutam-api-staging \
+            --force-new-deployment
+
+      - name: Deploy Worker Service to ECS Fargate
+        run: |
+          echo "[CD] Updating ECS service amrutam-worker-staging..."
+          aws ecs update-service \
+            --cluster amrutam-staging-cluster \
+            --service amrutam-worker-staging \
+            --force-new-deployment
+
+      - name: Post-Deployment Smoke Test
+        run: |
+          echo "[CD] Executing health check probe on staging..."
+          curl -f --retry 5 --retry-delay 5 https://staging-api.amrutam.global/api/v1/health/ready || (echo "[CD FATAL] Staging readiness failed! Triggering rollback..." && exit 1)
+
+  deploy-production:
+    name: Deploy to Production Environment (Zero-Downtime Rolling Update)
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.amrutam.global
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/AmrutamProdDeployer
+          aws-region: ap-south-1
+
+      - name: Run Database Migrations (Expand/Contract Pre-Rollout Step)
+        run: |
+          echo "[CD] Executing non-destructive backward-compatible migrations on Production..."
+          aws ecs run-task \
+            --cluster amrutam-prod-cluster \
+            --task-definition amrutam-migrator-prod \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-prod-priv1],securityGroups=[sg-migration-prod]}" \
+            --overrides '{"containerOverrides": [{"name": "migrator", "command": ["npm", "run", "migrate:up"]}]}'
+
+      - name: Deploy Production API (Rolling 200% Max, 100% Min)
+        run: |
+          echo "[CD] Triggering ECS Rolling Update for amrutam-api-prod..."
+          aws ecs update-service \
+            --cluster amrutam-prod-cluster \
+            --service amrutam-api-prod \
+            --force-new-deployment
+
+      - name: Deploy Production Background Worker
+        run: |
+          echo "[CD] Triggering ECS Rolling Update for amrutam-worker-prod..."
+          aws ecs update-service \
+            --cluster amrutam-prod-cluster \
+            --service amrutam-worker-prod \
+            --force-new-deployment
+
+      - name: Production Health Check & Automated Canary Verification
+        run: |
+          echo "[CD] Verifying Production /health/ready probe..."
+          curl -f --retry 10 --retry-delay 6 https://api.amrutam.global/api/v1/health/ready

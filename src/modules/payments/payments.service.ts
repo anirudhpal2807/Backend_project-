@@ -7,7 +7,7 @@ import { AppException } from '../../common/errors/app-exception';
 import { ErrorCode } from '../../common/errors/error-codes';
 import { OutboxService } from '../../infra/queue/outbox.service';
 import { AppLoggerService } from '../../common/logger/app-logger.service';
-import { IIdGenerator } from '../../common/id/id-generator.interface';
+import { UuidV7IdGenerator } from '../../common/id/uuidv7-id-generator';
 import { ConsultationStateMachine } from '../bookings/domain/consultation-state-machine';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class PaymentsService {
     private readonly paymentProvider: MockPaymentProvider,
     private readonly outboxService: OutboxService,
     private readonly logger: AppLoggerService,
-    private readonly idGenerator: IIdGenerator,
+    private readonly idGenerator: UuidV7IdGenerator,
   ) {}
 
   public async createPaymentIntent(

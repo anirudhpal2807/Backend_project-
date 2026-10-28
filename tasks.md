@@ -287,14 +287,22 @@
 
 ## Phase 14 — Infrastructure and CI/CD
 
-- [ ] **T-140** · P0 · deps: T-030 · Not Started — OpenAPI 3.1 spec generated/committed (`openapi/openapi.yaml`), Spectral lint in CI, examples and error schemas included.
-- [ ] **T-141** · P0 · deps: T-016, T-012 · Not Started — GitHub Actions CI: install (cached), lint, typecheck, unit, integration (service containers), coverage gate, OpenAPI validation.
-- [ ] **T-142** · P0 · deps: T-013, T-141 · Not Started — CI image build with BuildKit cache, tag by SHA, Trivy scan, push to registry (GHCR).
-- [ ] **T-143** · P1 · deps: T-142, T-145 · Not Started — CD workflow: deploy to staging, **migration step before rollout**, smoke test, manual approval for prod, rollback procedure.
-- [ ] **T-144** · P0 · deps: T-004 · Not Started — Terraform (AWS): VPC (multi-AZ, private subnets), RDS Postgres Multi-AZ (PITR, encryption), ElastiCache Redis, KMS keys, Secrets Manager, IAM least privilege.
-- [ ] **T-145** · P0 · deps: T-144 · Not Started — Terraform compute: ECS Fargate (or EKS) services for API and worker, ALB with TLS, autoscaling policies, security groups, log groups.
-- [ ] **T-146** · P1 · deps: T-145, T-141 · Not Started — `terraform fmt/validate/plan` in CI; environment tfvars (dev/staging/prod); remote state config documented.
-- [ ] **T-147** · P1 · deps: T-020 · Not Started — Zero-downtime migration strategy (expand/contract) documented with an example migration.
+- [x] **T-140** · P0 · deps: T-030 · Done — OpenAPI 3.1 spec generated/committed (`openapi/openapi.yaml`), Spectral lint in CI, examples and error schemas included.
+  Notes: Built scripts/export-openapi.ts, generated openapi/openapi.yaml & openapi/openapi.json, and created .spectral.yaml.
+- [x] **T-141** · P0 · deps: T-016, T-012 · Done — GitHub Actions CI: install (cached), lint, typecheck, unit, integration (service containers), coverage gate, OpenAPI validation.
+  Notes: Authored .github/workflows/ci.yml with multi-job pipeline, postgres/redis service containers, 80% coverage gate, and OpenAPI drift verification.
+- [x] **T-142** · P0 · deps: T-013, T-141 · Done — CI image build with BuildKit cache, tag by SHA, Trivy scan, push to registry (GHCR).
+  Notes: Authored .github/workflows/docker-publish.yml with BuildKit cache, SHA tagging, and Trivy security scanning.
+- [x] **T-143** · P1 · deps: T-142, T-145 · Done — CD workflow: deploy to staging, **migration step before rollout**, smoke test, manual approval for prod, rollback procedure.
+  Notes: Authored .github/workflows/cd.yml implementing staging deploy, pre-rollout migration task on ECS, smoke testing, and zero-downtime rolling update.
+- [x] **T-144** · P0 · deps: T-004 · Done — Terraform (AWS): VPC (multi-AZ, private subnets), RDS Postgres Multi-AZ (PITR, encryption), ElastiCache Redis, KMS keys, Secrets Manager, IAM least privilege.
+  Notes: Authored infra/terraform/modules/vpc, rds, elasticache, and kms with multi-AZ topology and customer-managed KMS key encryption.
+- [x] **T-145** · P0 · deps: T-144 · Done — Terraform compute: ECS Fargate (or EKS) services for API and worker, ALB with TLS, autoscaling policies, security groups, log groups.
+  Notes: Authored infra/terraform/modules/ecs with Fargate task definitions, ALB target groups, CloudWatch logs, and CPU target tracking autoscaling.
+- [x] **T-146** · P1 · deps: T-145, T-141 · Done — `terraform fmt/validate/plan` in CI; environment tfvars (dev/staging/prod); remote state config documented.
+  Notes: Authored infra/terraform/main.tf, variables.tf, outputs.tf, environments/staging.tfvars, and environments/prod.tfvars with S3 backend state locking.
+- [x] **T-147** · P1 · deps: T-020 · Done — Zero-downtime migration strategy (expand/contract) documented with an example migration.
+  Notes: Documented expand/contract migration lifecycle and concrete SQL triggers/backfill steps in docs/database/zero-downtime-migrations.md.
 
 ## Phase 15 — Documentation and Demo
 

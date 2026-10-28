@@ -1,0 +1,119 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    name: Lint, Format & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify code formatting
+        run: npx prettier --check "src/**/*.ts" "tests/**/*.ts"
+
+      - name: ESLint (Zero warnings)
+        run: npm run lint
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+  test:
+    name: Test Suite & Coverage Gate
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: amrutam_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit & integration test suites
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: amrutam_test
+          DB_USER: postgres
+          DB_PASSWORD: postgrespassword
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: dev-jwt-secret-at-least-32-chars-long-example
+          REFRESH_TOKEN_SECRET: dev-refresh-token-secret-at-least-32-chars
+          MASTER_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          PAYMENT_WEBHOOK_SECRET: mock-payment-webhook-secret-32-bytes-long
+        run: npm run test -- --coverage --coverageThreshold='{"global":{"branches":75,"functions":80,"lines":80,"statements":80}}'
+
+  openapi-spec-validation:
+    name: OpenAPI 3.1 Spec Lint & Drift Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Export OpenAPI Spec
+        run: npm run export:openapi
+
+      - name: Validate git drift
+        run: |
+          git diff --exit-code openapi/ || (echo "OpenAPI specification is out of date. Please run 'npm run export:openapi' and commit the result." && exit 1)
+
+      - name: Spectral Lint OpenAPI Spec
+        run: npx @stoplight/spectral-cli lint openapi/openapi.yaml

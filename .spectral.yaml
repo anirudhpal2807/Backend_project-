@@ -1,0 +1,6 @@
+extends: 'spectral:oas'
+rules:
+  operation-operationId: warn
+  info-contact: warn
+  info-description: error
+  openapi-tags: warn

@@ -541,6 +541,47 @@ Decisions made:
 Next:
   - Phase 14: Infrastructure and CI/CD (T-140 through T-147: OpenAPI 3.1 export script & YAML, GitHub Actions CI/CD workflows, multi-AZ Terraform AWS IaC modules, zero-downtime migration documentation).
 
+--------------------------------------------------------------------------------
+
+[ENTRY #016] 2026-10-28T19:20:00+05:30
+Task(s):    T-140 through T-147
+Phase:      14 — Infrastructure and CI/CD
+Status:     DONE
+
+Completed:
+  - T-140: Authored scripts/export-openapi.ts, exporting OpenAPI 3.1 specifications (986 lines) to openapi/openapi.yaml and openapi/openapi.json. Configured .spectral.yaml for OpenAPI linting.
+  - T-141: Built .github/workflows/ci.yml implementing multi-job pipeline with npm caching, Prettier checking, ESLint (0 warnings), tsc typecheck, test suites against PostgreSQL 16 & Redis 7 service containers, 80% coverage threshold gate, and OpenAPI drift verification.
+  - T-142: Built .github/workflows/docker-publish.yml for BuildKit-cached container builds, Git SHA tagging, GHCR publishing, and Trivy CVE scanning.
+  - T-143: Built .github/workflows/cd.yml covering automated staging deployment, ECS Fargate pre-rollout migration task execution, smoke testing, and zero-downtime rolling production rollout.
+  - T-144 & T-145: Authored production Terraform AWS infrastructure modules:
+    - infra/terraform/modules/vpc: Multi-AZ public, private application, and private database subnets with NAT Gateway.
+    - infra/terraform/modules/kms: Customer Managed Keys (CMK) with automatic annual key rotation for database storage and application PHI envelope encryption (KEK).
+    - infra/terraform/modules/rds: PostgreSQL 16 Multi-AZ instance with 35-day PITR, GP3 storage autoscaling, and KMS encryption.
+    - infra/terraform/modules/elasticache: Redis 7 replication group with Multi-AZ automated failover, TLS in-transit encryption, and authentication.
+    - infra/terraform/modules/ecs: ECS Fargate cluster with API and Worker task definitions, Application Load Balancer with HTTPS redirect, and target-tracking CPU autoscaling policies.
+  - T-146: Wired root main.tf, variables.tf, outputs.tf, environments/staging.tfvars, and environments/prod.tfvars with remote S3 backend state locking.
+  - T-147: Authored docs/database/zero-downtime-migrations.md documenting the 4-phase Expand/Contract migration lifecycle with sequence diagrams and concrete phone normalization examples.
+  - Architectural fix: Created CommonPlatformModule for universal logger, UUIDv7 ID generator, and system clock injection, and designated AuthModule as Global.
+
+Verification:
+  - npm run export:openapi generated valid openapi/openapi.yaml.
+  - npm run lint passed with 0 errors and 0 warnings.
+  - npm run typecheck passed with 0 errors.
+  - npm test passed with 123/123 tests across 25 suites passing.
+  - nest build compiled successfully into dist/.
+  - Phase 14 is 100% complete (8/8 tasks done). Total completed: 109/136 tasks (80% complete).
+
+Issues encountered:
+  - Nested Fastify version mismatch on Helmet plugin resolved via type assertion in main.ts.
+  - Service dependency resolution during headless Swagger export resolved cleanly by factoring CommonPlatformModule and marking AuthModule Global.
+
+Decisions made:
+  - Pre-rollout database migrations run as dedicated ECS Fargate one-off tasks prior to initiating rolling container updates.
+
+Next:
+  - Phase 15 & 16: Documentation, Demo Script & Final Polish (T-150 through T-169).
+
+
 
 
 

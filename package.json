@@ -25,7 +25,8 @@
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:create": "node-pg-migrate create",
-    "seed": "ts-node -r tsconfig-paths/register src/infra/db/seeds/seed.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/infra/db/seeds/seed.ts",
+    "export:openapi": "ts-node -T -r tsconfig-paths/register scripts/export-openapi.ts"
   },
   "dependencies": {
     "@fastify/helmet": "^11.1.1",
@@ -85,6 +86,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "yaml": "^2.9.1"
   }
 }

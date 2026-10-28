@@ -1,0 +1,5 @@
+environment        = "prod"
+aws_region         = "ap-south-1"
+image_uri          = "ghcr.io/amrutam/telemedicine-backend:prod-latest"
+rds_instance_class = "db.m6g.2xlarge"
+redis_node_type    = "cache.m6g.xlarge"

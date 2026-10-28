@@ -1,0 +1,5 @@
+environment        = "staging"
+aws_region         = "ap-south-1"
+image_uri          = "ghcr.io/amrutam/telemedicine-backend:staging-latest"
+rds_instance_class = "db.m6g.large"
+redis_node_type    = "cache.m6g.large"

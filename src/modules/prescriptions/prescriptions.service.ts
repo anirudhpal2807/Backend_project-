@@ -3,7 +3,7 @@ import { DatabaseService } from '../../infra/db/database.service';
 import { UnitOfWork } from '../../infra/db/unit-of-work';
 import { CryptoService } from '../../infra/crypto/crypto.service';
 import { OutboxService } from '../../infra/queue/outbox.service';
-import { IIdGenerator } from '../../common/id/id-generator.interface';
+import { UuidV7IdGenerator } from '../../common/id/uuidv7-id-generator';
 import { AppLoggerService } from '../../common/logger/app-logger.service';
 import { AuditService } from '../audit/audit.service';
 import {
@@ -21,7 +21,7 @@ export class PrescriptionsService {
     private readonly uow: UnitOfWork,
     private readonly cryptoService: CryptoService,
     private readonly outboxService: OutboxService,
-    private readonly idGenerator: IIdGenerator,
+    private readonly idGenerator: UuidV7IdGenerator,
     private readonly logger: AppLoggerService,
     @Optional() private readonly auditService?: AuditService,
   ) {}

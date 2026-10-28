@@ -20,7 +20,7 @@ async function bootstrap() {
   });
 
   // Security Headers via Helmet (T-120)
-  await app.register(helmet, {
+  await app.register(helmet as unknown as Parameters<typeof app.register>[0], {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: [`'self'`],

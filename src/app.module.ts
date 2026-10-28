@@ -19,6 +19,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { ObservabilityModule } from './modules/observability/observability.module';
 import { MetricsInterceptor } from './modules/observability/metrics.interceptor';
+import { CommonPlatformModule } from './common/common-platform.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
 import { IdempotencyInterceptor } from './common/idempotency/idempotency.interceptor';
@@ -26,6 +27,7 @@ import { IdempotencyInterceptor } from './common/idempotency/idempotency.interce
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    CommonPlatformModule,
     DbModule,
     RedisModule,
     CryptoModule,

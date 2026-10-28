@@ -1,7 +1,7 @@
 import { Injectable, HttpStatus } from '@nestjs/common';
 import { DatabaseService } from '../../infra/db/database.service';
 import { UnitOfWork } from '../../infra/db/unit-of-work';
-import { IIdGenerator } from '../../common/id/id-generator.interface';
+import { UuidV7IdGenerator } from '../../common/id/uuidv7-id-generator';
 import { AppLoggerService } from '../../common/logger/app-logger.service';
 import { OutboxService } from '../../infra/queue/outbox.service';
 import { PaymentsService } from '../payments/payments.service';
@@ -17,7 +17,7 @@ export class BookingsService {
   constructor(
     private readonly dbService: DatabaseService,
     private readonly uow: UnitOfWork,
-    private readonly idGenerator: IIdGenerator,
+    private readonly idGenerator: UuidV7IdGenerator,
     private readonly logger: AppLoggerService,
     private readonly outboxService: OutboxService,
     private readonly paymentsService: PaymentsService,
