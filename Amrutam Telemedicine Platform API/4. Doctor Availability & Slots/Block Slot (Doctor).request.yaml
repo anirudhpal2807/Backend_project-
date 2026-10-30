@@ -1,0 +1,9 @@
+$kind: http-request
+description: Doctor blocks an unbooked slot. Returns 409 if slot is held or booked.
+url: "{{baseUrl}}/api/v1/availability/slots/:slotId/block"
+method: POST
+pathVariables:
+  - key: slotId
+    value: "{{slotId}}"
+    description: Slot UUID to block
+order: 3000

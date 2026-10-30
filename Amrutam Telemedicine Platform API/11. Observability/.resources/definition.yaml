@@ -1,0 +1,3 @@
+$kind: collection
+description: Prometheus RED metrics scraper endpoint
+order: 12000

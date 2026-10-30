@@ -1,0 +1,3 @@
+$kind: collection
+description: Immutable versioned digital prescriptions with cryptographic hash signatures
+order: 9000

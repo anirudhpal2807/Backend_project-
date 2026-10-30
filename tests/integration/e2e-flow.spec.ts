@@ -180,10 +180,18 @@ describe('End-to-End Lifecycle Flow (T-076)', () => {
       },
     } as unknown as DatabaseService;
 
+    const mockCashfreeProvider = {
+      isConfigured: jest.fn().mockReturnValue(false),
+      createIntent: jest.fn(),
+      verifyWebhookSignature: jest.fn(),
+      refund: jest.fn(),
+    } as any;
+
     paymentsService = new PaymentsService(
       mockDbService,
       mockUow,
       mockPaymentProvider,
+      mockCashfreeProvider,
       mockOutbox,
       mockLogger,
       mockIdGen,

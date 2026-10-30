@@ -1,0 +1,7 @@
+$kind: http-request
+description: Returns platform version, status, and service links.
+url: "{{baseUrl}}/api/v1"
+method: GET
+auth:
+  type: noauth
+order: 1000

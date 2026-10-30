@@ -1,0 +1,3 @@
+$kind: collection
+description: User profile management with AES-256-GCM encrypted PII fields at rest
+order: 3000

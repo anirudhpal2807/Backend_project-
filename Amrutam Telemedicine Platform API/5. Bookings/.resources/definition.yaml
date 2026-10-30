@@ -1,0 +1,3 @@
+$kind: collection
+description: Slot reservation hold saga (10-minute hold) and booking cancellation
+order: 6000

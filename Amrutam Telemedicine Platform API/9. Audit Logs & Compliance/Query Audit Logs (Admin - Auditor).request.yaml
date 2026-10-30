@@ -1,0 +1,36 @@
+$kind: http-request
+name: Query Audit Logs (Admin / Auditor)
+description: Query immutable audit logs with keyset cursor pagination.
+url: "{{baseUrl}}/api/v1/audit/logs?limit=50&from_date=2026-10-01&to_date=2026-10-30"
+method: GET
+queryParams:
+  - key: limit
+    value: "50"
+    description: Max items per page (1-100)
+  - key: from_date
+    value: 2026-10-01
+    description: Filter logs on or after this ISO date
+  - key: to_date
+    value: 2026-10-30
+    description: Filter logs on or before this ISO date
+  - key: actor_id
+    value: ""
+    disabled: true
+    description: Filter by actor ID
+  - key: actor_role
+    value: DOCTOR
+    disabled: true
+    description: Filter by actor role
+  - key: action
+    value: CONSULTATION_STARTED
+    disabled: true
+    description: Filter by action
+  - key: resource_type
+    value: consultation
+    disabled: true
+    description: Filter by resource type
+  - key: outcome
+    value: SUCCESS
+    disabled: true
+    description: Filter by SUCCESS or FAILURE
+order: 1000

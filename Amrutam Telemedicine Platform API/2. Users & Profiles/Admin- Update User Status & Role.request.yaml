@@ -1,0 +1,19 @@
+$kind: http-request
+name: "Admin: Update User Status & Role"
+description: Activate, deactivate, or change role of a user (Admin only).
+url: "{{baseUrl}}/api/v1/users/admin/:id"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  - key: id
+    value: "{{userId}}"
+    description: Target user ID
+body:
+  type: json
+  content: |-
+    {
+      "isActive": true,
+      "role": "DOCTOR"
+    }
+order: 4000

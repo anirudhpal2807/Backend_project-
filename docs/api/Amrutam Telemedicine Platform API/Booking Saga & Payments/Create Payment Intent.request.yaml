@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/payments/intent"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{authToken}}
+body:
+  type: text
+  content: |-
+    {
+      "consultationId": "018f673e-cons-7000-8000-000000000001"
+    }
+order: 2000

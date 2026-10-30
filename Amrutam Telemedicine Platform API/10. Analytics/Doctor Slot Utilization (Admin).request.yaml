@@ -1,0 +1,10 @@
+$kind: http-request
+description: Doctor slot utilization rate and total materialized capacity.
+url: "{{baseUrl}}/api/v1/analytics/utilization?from_date=2026-10-01&to_date=2026-10-28&dimension=TOTAL&dimension_value=ALL"
+method: GET
+queryParams:
+  from_date: 2026-10-01
+  to_date: 2026-10-28
+  dimension: TOTAL
+  dimension_value: ALL
+order: 4000

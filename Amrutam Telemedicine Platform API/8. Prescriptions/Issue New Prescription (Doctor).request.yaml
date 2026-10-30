@@ -1,0 +1,41 @@
+$kind: http-request
+description: Doctor issues a new encrypted prescription. Payload is cryptographically hashed.
+url: "{{baseUrl}}/api/v1/prescriptions"
+method: POST
+headers:
+  Content-Type: application/json
+  Idempotency-Key: "{{$guid}}"
+body:
+  type: json
+  content: |-
+    {
+      "consultation_id": "{{consultationId}}",
+      "items": [
+        {
+          "medicine_name": "Ashwagandharishta",
+          "dosage": "15ml twice daily",
+          "frequency": "After meals with equal parts warm water",
+          "duration_days": 30,
+          "instructions": "Promotes sleep quality and stress resilience."
+        },
+        {
+          "medicine_name": "Brahmi Vati",
+          "dosage": "1 tablet",
+          "frequency": "Night before bedtime",
+          "duration_days": 15,
+          "instructions": "Consume with warm milk."
+        }
+      ],
+      "instructions": "Avoid fried foods, night waking, and cold showers."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201) {
+          var json = pm.response.json();
+          if (json.id) {
+              pm.collectionVariables.set('prescriptionId', json.id);
+          }
+      }
+    language: text/javascript
+order: 1000

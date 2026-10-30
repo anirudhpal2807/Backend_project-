@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { AppConfigService } from '../../infra/config/config.service';
+import { AppException } from '../../common/errors/app-exception';
+import { ErrorCode } from '../../common/errors/error-codes';
 
 export interface JwtPayload {
   sub: string; // user_id
@@ -36,6 +38,14 @@ export class TokenService {
   }
 
   verifyToken(token: string): JwtPayload {
-    return jwt.verify(token, this.secret) as JwtPayload;
+    try {
+      return jwt.verify(token, this.secret) as JwtPayload;
+    } catch {
+      throw new AppException(
+        HttpStatus.UNAUTHORIZED,
+        ErrorCode.UNAUTHORIZED,
+        'MFA session or token is invalid or has expired (5 minute TTL). Please login again to get a fresh challenge.',
+      );
+    }
   }
 }

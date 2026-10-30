@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/bookings/hold"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{authToken}}
+  Idempotency-Key: 018f673e-hold-7000-8000-000000000001
+body:
+  type: text
+  content: |-
+    {
+      "slotId": "018f673e-slot-7000-8000-000000000001"
+    }
+order: 1000

@@ -1,0 +1,7 @@
+$kind: http-request
+description: Kubernetes readiness check (validates database pool and Redis connection).
+url: "{{baseUrl}}/api/v1/health/ready"
+method: GET
+auth:
+  type: noauth
+order: 2000

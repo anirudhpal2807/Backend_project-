@@ -14,23 +14,38 @@ describe('Availability & Slots Management (T-051, T-053)', () => {
     } as unknown as DatabaseService;
   }
 
-  describe('blockSlot', () => {
-    it('rejects blocking a slot that is already BOOKED with 409 Conflict', async () => {
-      const mockDb = {
-        selectFrom: () => ({
-          selectAll: () => ({
+  function createMockDb(slotStatus: string) {
+    return {
+      selectFrom: (table: string) => ({
+        select: () => ({
+          where: () => ({
+            executeTakeFirst: jest.fn().mockResolvedValue({ id: 'doc-1' }),
+          }),
+        }),
+        selectAll: () => ({
+          where: () => ({
             where: () => ({
-              where: () => ({
-                executeTakeFirst: jest.fn().mockResolvedValue({
-                  id: 'slot-1',
-                  status: 'BOOKED',
-                }),
+              executeTakeFirst: jest.fn().mockResolvedValue({
+                id: 'slot-1',
+                status: slotStatus,
               }),
             }),
           }),
         }),
-      };
+      }),
+      updateTable: () => ({
+        set: () => ({
+          where: () => ({
+            execute: jest.fn().mockResolvedValue({}),
+          }),
+        }),
+      }),
+    };
+  }
 
+  describe('blockSlot', () => {
+    it('rejects blocking a slot that is already BOOKED with 409 Conflict', async () => {
+      const mockDb = createMockDb('BOOKED');
       const availabilityService = new AvailabilityService(createMockDbService(mockDb));
 
       try {
@@ -45,21 +60,7 @@ describe('Availability & Slots Management (T-051, T-053)', () => {
     });
 
     it('rejects blocking a slot that is currently HELD with 409 Conflict', async () => {
-      const mockDb = {
-        selectFrom: () => ({
-          selectAll: () => ({
-            where: () => ({
-              where: () => ({
-                executeTakeFirst: jest.fn().mockResolvedValue({
-                  id: 'slot-1',
-                  status: 'HELD',
-                }),
-              }),
-            }),
-          }),
-        }),
-      };
-
+      const mockDb = createMockDb('HELD');
       const availabilityService = new AvailabilityService(createMockDbService(mockDb));
 
       try {
@@ -72,30 +73,7 @@ describe('Availability & Slots Management (T-051, T-053)', () => {
     });
 
     it('allows blocking an OPEN slot', async () => {
-      const mockUpdate = jest.fn().mockReturnValue({
-        set: () => ({
-          where: () => ({
-            execute: jest.fn().mockResolvedValue({}),
-          }),
-        }),
-      });
-
-      const mockDb = {
-        selectFrom: () => ({
-          selectAll: () => ({
-            where: () => ({
-              where: () => ({
-                executeTakeFirst: jest.fn().mockResolvedValue({
-                  id: 'slot-1',
-                  status: 'OPEN',
-                }),
-              }),
-            }),
-          }),
-        }),
-        updateTable: mockUpdate,
-      };
-
+      const mockDb = createMockDb('OPEN');
       const availabilityService = new AvailabilityService(createMockDbService(mockDb));
       const result = await availabilityService.blockSlot('doc-1', 'slot-1');
       expect(result.message).toContain('Slot blocked successfully');

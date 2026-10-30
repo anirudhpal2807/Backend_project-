@@ -1,0 +1,3 @@
+$kind: collection
+description: Service root and API health/discovery endpoint
+order: 1000

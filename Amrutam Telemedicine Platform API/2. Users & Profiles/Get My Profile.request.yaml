@@ -1,0 +1,5 @@
+$kind: http-request
+description: Get decrypted profile of current user.
+url: "{{baseUrl}}/api/v1/users/profile/me"
+method: GET
+order: 1000

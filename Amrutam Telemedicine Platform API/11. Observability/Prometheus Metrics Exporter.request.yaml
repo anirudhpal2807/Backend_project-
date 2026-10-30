@@ -1,0 +1,7 @@
+$kind: http-request
+description: Scrapes real-time RED metrics in Prometheus exposition text format.
+url: "{{baseUrl}}/api/v1/metrics"
+method: GET
+auth:
+  type: noauth
+order: 1000

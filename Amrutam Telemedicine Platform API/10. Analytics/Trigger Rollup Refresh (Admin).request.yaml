@@ -1,0 +1,13 @@
+$kind: http-request
+description: Force on-demand recalculation of analytics rollups for a specific calendar date.
+url: "{{baseUrl}}/api/v1/analytics/refresh"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "date": "2026-10-28"
+    }
+order: 5000

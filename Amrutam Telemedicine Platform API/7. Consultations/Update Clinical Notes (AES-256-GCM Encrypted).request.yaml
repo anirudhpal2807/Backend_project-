@@ -1,0 +1,18 @@
+$kind: http-request
+description: Doctor updates clinical notes. Features optimistic locking via `version` field and zero-knowledge encryption at rest.
+url: "{{baseUrl}}/api/v1/consultations/:id/notes"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  - key: id
+    value: "{{consultationId}}"
+    description: Consultation UUID
+body:
+  type: json
+  content: |-
+    {
+      "notes": "Patient diagnosed with Vata-Pitta imbalance. Advised dietary modifications (avoid raw foods, favor warm grounding soups). Prescribed Ashwagandha and Brahmi.",
+      "version": 0
+    }
+order: 2000

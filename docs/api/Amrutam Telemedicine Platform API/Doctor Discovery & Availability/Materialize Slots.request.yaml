@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/availability/materialize"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: Bearer {{authToken}}
+body:
+  type: text
+  content: |-
+    {
+      "startDate": "2026-10-29",
+      "days": 7
+    }
+order: 2000

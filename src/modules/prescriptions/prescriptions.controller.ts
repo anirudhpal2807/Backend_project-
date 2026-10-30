@@ -11,7 +11,7 @@ import { ErrorCode } from '../../common/errors/error-codes';
 import { Idempotent } from '../../common/idempotency/idempotency.decorator';
 
 @ApiTags('Prescriptions')
-@Controller('api/v1/prescriptions')
+@Controller('prescriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class PrescriptionsController {

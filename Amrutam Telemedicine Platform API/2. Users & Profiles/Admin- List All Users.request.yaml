@@ -1,0 +1,6 @@
+$kind: http-request
+name: "Admin: List All Users"
+description: List all registered users (Admin only).
+url: "{{baseUrl}}/api/v1/users/admin/list"
+method: GET
+order: 3000

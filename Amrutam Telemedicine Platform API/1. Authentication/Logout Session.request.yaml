@@ -1,0 +1,15 @@
+$kind: http-request
+description: Logout and revoke the given refresh token.
+url: "{{baseUrl}}/api/v1/auth/logout"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "refreshToken": "{{refreshToken}}"
+    }
+auth:
+  type: noauth
+order: 7000

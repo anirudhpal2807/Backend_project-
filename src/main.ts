@@ -5,10 +5,13 @@ import { AppModule } from './app.module';
 import { AppConfigService } from './infra/config/config.service';
 
 import helmet from '@fastify/helmet';
+import fastifyStatic from '@fastify/static';
+import * as path from 'path';
 
 async function bootstrap() {
   const adapter = new FastifyAdapter({
     logger: false,
+    ignoreTrailingSlash: true,
     bodyLimit: 1048576, // 1MB body limit (T-120)
     trustProxy: true, // trust upstream ALB proxy (T-120)
     connectionTimeout: 15000, // 15s request timeout (T-120)
@@ -21,26 +24,27 @@ async function bootstrap() {
 
   // Security Headers via Helmet (T-120)
   await app.register(helmet as unknown as Parameters<typeof app.register>[0], {
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: [`'self'`],
-        styleSrc: [`'self'`, `'unsafe-inline'`],
-        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-        scriptSrc: [`'self'`, `'unsafe-inline'`],
-      },
-    },
+    contentSecurityPolicy: false,
     frameguard: { action: 'deny' },
     hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
   });
 
-  // Strict CORS Allowlist (T-120)
+  // Serve Testing Portal UI at /portal/
+  await app.register(fastifyStatic as unknown as Parameters<typeof app.register>[0], {
+    root: path.join(process.cwd(), 'public'),
+    prefix: '/portal/',
+    decorateReply: false,
+  });
+
+  // Redirect root / to Testing Portal
+  const fastify = app.getHttpAdapter().getInstance();
+  fastify.get('/', (_req: any, reply: any) => {
+    reply.redirect('/portal/index.html');
+  });
+
+  // Permissive CORS for development & API portal testing
   app.enableCors({
-    origin: [
-      'https://amrutam.global',
-      'https://app.amrutam.global',
-      'https://doctor.amrutam.global',
-      'http://localhost:3000',
-    ],
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
@@ -49,6 +53,7 @@ async function bootstrap() {
       'Idempotency-Key',
       'x-request-id',
       'traceparent',
+      'x-signature',
     ],
   });
 
@@ -91,7 +96,7 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
   process.stdout.write(
-    `\n[API Server] Amrutam backend running on http://localhost:${port}/${prefix}\n[API Docs] Swagger documentation available at http://localhost:${port}/docs\n\n`,
+    `\n[API Server] Amrutam backend running on http://localhost:${port}/${prefix}\n[API Docs] Swagger documentation available at http://localhost:${port}/docs\n[Testing Portal] Interactive Frontend available at http://localhost:${port}/portal/index.html\n\n`,
   );
 }
 

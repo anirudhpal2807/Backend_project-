@@ -1,0 +1,10 @@
+$kind: http-request
+description: Booking conversion funnel metrics (Slots -> Held -> Confirmed -> Completed).
+url: "{{baseUrl}}/api/v1/analytics/funnel?from_date=2026-10-01&to_date=2026-10-28&dimension=TOTAL&dimension_value=ALL"
+method: GET
+queryParams:
+  from_date: 2026-10-01
+  to_date: 2026-10-28
+  dimension: TOTAL
+  dimension_value: ALL
+order: 2000

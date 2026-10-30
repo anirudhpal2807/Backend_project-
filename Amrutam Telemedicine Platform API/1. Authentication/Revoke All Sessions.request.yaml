@@ -1,0 +1,5 @@
+$kind: http-request
+description: Revoke all active sessions and refresh tokens for current authenticated user.
+url: "{{baseUrl}}/api/v1/auth/revoke-all-sessions"
+method: POST
+order: 8000

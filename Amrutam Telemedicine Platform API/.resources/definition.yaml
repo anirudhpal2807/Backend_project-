@@ -1,0 +1,35 @@
+$kind: collection
+description: |-
+  Comprehensive Postman collection for Amrutam Telemedicine Backend API.
+
+  Covers all 34 endpoints across:
+  - Root & Discovery
+  - Authentication (Registration, Login, MFA, Token Rotation, Revocation)
+  - Users & Profiles (Decrypted profile, encrypted updates, admin controls)
+  - Doctors (FTS search, onboarding, admin verification, public profiles)
+  - Availability & Slots (Rules, generation, blocking/unblocking)
+  - Bookings (10-min hold saga, cancellation)
+  - Payments (Stripe payment intents, webhook replay safety)
+  - Consultations (Start, AES-256-GCM clinical notes, completion, video session)
+  - Prescriptions (Issuing, versioned amending, role-based redactions)
+  - Immutable Audit Logs (Log search, SHA-256 chain verification, GDPR erasure)
+  - Analytics (KPI summary, funnel, revenue, utilization, CSV export, rollups)
+  - Observability (Prometheus metrics exposition)
+  - Health Checks (Liveness and readiness probes)
+variables:
+  baseUrl: http://localhost:3000
+  accessToken: ""
+  refreshToken: ""
+  mfaToken: ""
+  userId: 00000000-0000-0000-0000-000000000001
+  doctorId: 00000000-0000-0000-0000-000000000002
+  slotId: 00000000-0000-0000-0000-000000000003
+  bookingId: 00000000-0000-0000-0000-000000000004
+  consultationId: 00000000-0000-0000-0000-000000000005
+  prescriptionId: 00000000-0000-0000-0000-000000000006
+auth:
+  - id: 0c0daef7-b2f4-42d7-9a24-0155f6c2eebe
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{accessToken}}"

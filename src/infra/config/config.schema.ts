@@ -9,7 +9,7 @@ export const EnvSchema = z.object({
   // Database
   DATABASE_URL: z.string().optional(),
   DB_SSL: z.coerce.boolean().optional().default(false),
-  DB_HOST: z.string().optional().default('localhost'),
+  DB_HOST: z.string().min(1, 'DB_HOST is required').optional().default('localhost'),
   DB_PORT: z.coerce.number().default(5432),
   DB_NAME: z.string().optional().default('amrutam_telemed'),
   DB_USER: z.string().optional().default('postgres'),
@@ -38,6 +38,13 @@ export const EnvSchema = z.object({
 
   // Payment Webhook
   PAYMENT_WEBHOOK_SECRET: z.string().min(16, 'PAYMENT_WEBHOOK_SECRET is required'),
+
+  // Cashfree Payment Gateway
+  CASHFREE_APP_ID: z.string().optional().default(''),
+  CASHFREE_SECRET_KEY: z.string().optional().default(''),
+  CASHFREE_ENV: z.enum(['sandbox', 'production']).default('sandbox'),
+  CASHFREE_WEBHOOK_SECRET: z.string().optional().default(''),
+  CASHFREE_API_VERSION: z.string().default('2023-08-01'),
 
   // Telemetry
   OTEL_SERVICE_NAME: z.string().default('amrutam-telemedicine-backend'),

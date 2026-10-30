@@ -1,0 +1,22 @@
+name: Amrutam Telemedicine - Localhost
+values:
+  - key: baseUrl
+    value: 'http://localhost:3000'
+  - key: accessToken
+    value: ''
+  - key: refreshToken
+    value: ''
+  - key: mfaToken
+    value: ''
+  - key: userId
+    value: 00000000-0000-0000-0000-000000000001
+  - key: doctorId
+    value: 00000000-0000-0000-0000-000000000002
+  - key: slotId
+    value: 00000000-0000-0000-0000-000000000003
+  - key: bookingId
+    value: 00000000-0000-0000-0000-000000000004
+  - key: consultationId
+    value: 00000000-0000-0000-0000-000000000005
+  - key: prescriptionId
+    value: 00000000-0000-0000-0000-000000000006

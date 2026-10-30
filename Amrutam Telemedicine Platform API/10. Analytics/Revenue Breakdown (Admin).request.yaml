@@ -1,0 +1,10 @@
+$kind: http-request
+description: Daily breakdown of gross revenue, refunds, and net revenue in INR.
+url: "{{baseUrl}}/api/v1/analytics/revenue?from_date=2026-10-01&to_date=2026-10-28&dimension=TOTAL&dimension_value=ALL"
+method: GET
+queryParams:
+  from_date: 2026-10-01
+  to_date: 2026-10-28
+  dimension: TOTAL
+  dimension_value: ALL
+order: 3000

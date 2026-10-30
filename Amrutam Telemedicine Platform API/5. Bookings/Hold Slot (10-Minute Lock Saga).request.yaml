@@ -1,0 +1,31 @@
+$kind: http-request
+description: Patient holds an open slot for 10 minutes. Triggers TTL countdown in Redis/BullMQ. Returns 409 if slot is taken or patient has overlapping booking.
+url: "{{baseUrl}}/api/v1/bookings"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: "{{$guid}}"
+    description: Idempotency key prevents double booking
+body:
+  type: json
+  content: |-
+    {
+      "slot_id": "{{slotId}}",
+      "notes": "Experiencing recurrent headaches and fatigue. Seeking Ayurvedic lifestyle advice."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 201) {
+          var json = pm.response.json();
+          if (json.consultationId) {
+              pm.collectionVariables.set('consultationId', json.consultationId);
+          }
+          if (json.bookingId || json.id) {
+              pm.collectionVariables.set('bookingId', json.bookingId || json.id);
+          }
+      }
+    language: text/javascript
+order: 1000

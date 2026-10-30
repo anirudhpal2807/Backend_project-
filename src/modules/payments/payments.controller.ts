@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Headers, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentIntentSchema, PaymentWebhookPayloadSchema } from './dto/payment.dto';
@@ -11,7 +11,7 @@ import { ErrorCode } from '../../common/errors/error-codes';
 import { Idempotent } from '../../common/idempotency/idempotency.decorator';
 
 @ApiTags('Payments')
-@Controller('api/v1/payments')
+@Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
@@ -57,29 +57,43 @@ export class PaymentsController {
     summary: 'Provider payment webhook with HMAC verification and replay deduplication',
   })
   @ApiResponse({ status: 200, description: 'Webhook acknowledged' })
-  public async handleWebhook(@Body() body: unknown, @Headers('x-signature') signature: string) {
-    if (!signature) {
+  public async handleWebhook(
+    @Body() body: any,
+    @Headers('x-signature') signature?: string,
+    @Headers('x-webhook-signature') cfSignature?: string,
+    @Headers('x-webhook-timestamp') cfTimestamp?: string,
+  ) {
+    const activeSignature = cfSignature || signature;
+    if (!activeSignature) {
       throw new AppException(
         HttpStatus.BAD_REQUEST,
         ErrorCode.SIGNATURE_VERIFICATION_FAILED,
-        'Missing x-signature header',
+        'Missing webhook signature header (x-webhook-signature or x-signature)',
       );
     }
 
-    const parseResult = PaymentWebhookPayloadSchema.safeParse(body);
-    if (!parseResult.success) {
-      throw new AppException(
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.VALIDATION_FAILED,
-        'Invalid webhook payload schema',
-        parseResult.error.errors.map(e => ({
-          name: e.path.join('.'),
-          reason: e.message,
-        })),
-      );
-    }
+    const rawPayload = typeof body === 'string' ? body : JSON.stringify(body);
+    return this.paymentsService.handleWebhook(rawPayload, activeSignature, body, cfTimestamp);
+  }
 
-    const rawPayload = JSON.stringify(body);
-    return this.paymentsService.handleWebhook(rawPayload, signature, parseResult.data);
+  @Post('cashfree/webhook')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Dedicated Cashfree PG webhook handler',
+  })
+  public async handleCashfreeWebhook(
+    @Body() body: any,
+    @Headers('x-webhook-signature') cfSignature?: string,
+    @Headers('x-signature') signature?: string,
+    @Headers('x-webhook-timestamp') cfTimestamp?: string,
+  ) {
+    return this.handleWebhook(body, signature, cfSignature, cfTimestamp);
+  }
+
+  @Get('cashfree/verify/:orderId')
+  @ApiOperation({ summary: 'Verify Cashfree order status directly from Cashfree PG' })
+  @ApiResponse({ status: 200, description: 'Order status fetched and reconciled' })
+  public async verifyCashfreeOrder(@Param('orderId') orderId: string) {
+    return this.paymentsService.verifyCashfreeOrder(orderId);
   }
 }

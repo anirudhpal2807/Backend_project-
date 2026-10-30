@@ -49,3 +49,9 @@ tempo_data/
 scratch/
 tmp/
 files (1)/
+
+# Local Prompts & Task Docs
+prd.md
+prompt.md
+task.md
+tasks.md

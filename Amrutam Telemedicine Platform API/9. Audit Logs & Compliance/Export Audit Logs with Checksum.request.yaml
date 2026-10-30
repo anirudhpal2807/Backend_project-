@@ -1,0 +1,8 @@
+$kind: http-request
+description: Export verified audit logs bundled with an integrity verification checksum.
+url: "{{baseUrl}}/api/v1/audit/export?from_date=2026-10-01&to_date=2026-10-30"
+method: GET
+queryParams:
+  from_date: 2026-10-01
+  to_date: 2026-10-30
+order: 3000

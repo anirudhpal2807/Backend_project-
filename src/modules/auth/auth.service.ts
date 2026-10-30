@@ -56,7 +56,9 @@ export class AuthService {
     });
 
     const userId = uuidv7();
-    const role: UserRole = dto.role || 'PATIENT';
+    const rawRole = (dto.role || 'PATIENT').toString().toUpperCase() as UserRole;
+    const allowedRoles: UserRole[] = ['PATIENT', 'DOCTOR', 'ADMIN', 'AUDITOR'];
+    const role: UserRole = allowedRoles.includes(rawRole) ? rawRole : 'PATIENT';
 
     await this.dbService.db.transaction().execute(async trx => {
       await trx

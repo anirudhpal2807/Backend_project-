@@ -1,0 +1,7 @@
+$kind: http-request
+description: Kubernetes liveness check (HTTP 200 when service process is running).
+url: "{{baseUrl}}/api/v1/health/live"
+method: GET
+auth:
+  type: noauth
+order: 1000

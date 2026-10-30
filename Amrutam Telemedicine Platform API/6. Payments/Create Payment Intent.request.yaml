@@ -1,0 +1,17 @@
+$kind: http-request
+description: Create a Stripe/Razorpay payment intent for a held consultation slot.
+url: "{{baseUrl}}/api/v1/payments/intent"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: "{{$guid}}"
+    description: Required idempotency key for financial safety
+body:
+  type: json
+  content: |-
+    {
+      "consultation_id": "{{consultationId}}"
+    }
+order: 1000

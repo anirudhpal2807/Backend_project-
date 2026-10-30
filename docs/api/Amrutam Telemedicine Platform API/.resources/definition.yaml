@@ -1,0 +1,5 @@
+$kind: collection
+description: Production-grade REST collection for the Amrutam Telemedicine Platform
+variables:
+  baseUrl: http://localhost:3000/api/v1
+  authToken: ""

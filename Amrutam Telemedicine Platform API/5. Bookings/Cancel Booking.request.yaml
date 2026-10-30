@@ -1,0 +1,21 @@
+$kind: http-request
+description: Cancel a booking. Applies automated refund policy depending on lead time.
+url: "{{baseUrl}}/api/v1/bookings/:id/cancel"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: Idempotency-Key
+    value: "{{$guid}}"
+    description: Idempotency key prevents duplicate cancellation
+pathVariables:
+  - key: id
+    value: "{{bookingId}}"
+    description: Booking UUID
+body:
+  type: json
+  content: |-
+    {
+      "reason": "Schedule conflict due to emergency travel."
+    }
+order: 2000

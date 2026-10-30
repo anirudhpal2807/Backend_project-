@@ -1,0 +1,13 @@
+$kind: http-request
+name: Verify Hash Chain Integrity (Admin / Auditor)
+description: Validates SHA-256 prev_hash chain continuity across all sequential log records to guarantee tamper-evidence.
+url: "{{baseUrl}}/api/v1/audit/verify-chain?from_date=2026-10-01&to_date=2026-10-30"
+method: POST
+queryParams:
+  - key: from_date
+    value: 2026-10-01
+    description: Start of verification range
+  - key: to_date
+    value: 2026-10-30
+    description: End of verification range
+order: 2000

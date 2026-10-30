@@ -568,7 +568,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/payments/intent": {
+    "/api/v1/payments/intent": {
       "post": {
         "operationId": "PaymentsController_createPaymentIntent",
         "parameters": [
@@ -597,7 +597,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/payments/webhook": {
+    "/api/v1/payments/webhook": {
       "post": {
         "operationId": "PaymentsController_handleWebhook",
         "parameters": [
@@ -621,7 +621,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/bookings": {
+    "/api/v1/bookings": {
       "post": {
         "operationId": "BookingsController_holdSlot",
         "parameters": [],
@@ -644,7 +644,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/bookings/{id}/cancel": {
+    "/api/v1/bookings/{id}/cancel": {
       "post": {
         "operationId": "BookingsController_cancelBooking",
         "parameters": [
@@ -673,7 +673,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/consultations/{id}/start": {
+    "/api/v1/consultations/{id}/start": {
       "post": {
         "operationId": "ConsultationsController_startConsultation",
         "parameters": [
@@ -702,7 +702,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/consultations/{id}/notes": {
+    "/api/v1/consultations/{id}/notes": {
       "patch": {
         "operationId": "ConsultationsController_updateClinicalNotes",
         "parameters": [
@@ -731,7 +731,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/consultations/{id}/complete": {
+    "/api/v1/consultations/{id}/complete": {
       "post": {
         "operationId": "ConsultationsController_completeConsultation",
         "parameters": [
@@ -760,7 +760,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/consultations/{id}": {
+    "/api/v1/consultations/{id}": {
       "get": {
         "operationId": "ConsultationsController_getConsultation",
         "parameters": [
@@ -789,7 +789,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/prescriptions": {
+    "/api/v1/prescriptions": {
       "post": {
         "operationId": "PrescriptionsController_createPrescription",
         "parameters": [],
@@ -809,7 +809,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/prescriptions/{id}/amend": {
+    "/api/v1/prescriptions/{id}/amend": {
       "post": {
         "operationId": "PrescriptionsController_amendPrescription",
         "parameters": [
@@ -838,7 +838,7 @@
         ]
       }
     },
-    "/api/v1/api/v1/prescriptions/{id}": {
+    "/api/v1/prescriptions/{id}": {
       "get": {
         "operationId": "PrescriptionsController_getPrescription",
         "parameters": [

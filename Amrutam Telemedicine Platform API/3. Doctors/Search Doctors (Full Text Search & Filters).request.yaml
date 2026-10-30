@@ -1,0 +1,26 @@
+$kind: http-request
+description: Search verified doctors with Redis caching and PostgreSQL FTS.
+url: "{{baseUrl}}/api/v1/doctors/search?q=Ayurveda&specialization=Ayurveda&language=Hindi&min_fee=100&max_fee=2000&limit=20"
+method: GET
+queryParams:
+  - key: q
+    value: Ayurveda
+    description: Full-text search query across doctor bio and details
+  - key: specialization
+    value: Ayurveda
+    description: Filter by specialization
+  - key: language
+    value: Hindi
+    description: Filter by language
+  - key: min_fee
+    value: "100"
+    description: Minimum consultation fee in INR
+  - key: max_fee
+    value: "2000"
+    description: Maximum consultation fee in INR
+  - key: limit
+    value: "20"
+    description: Result page size (max 50)
+auth:
+  type: noauth
+order: 1000

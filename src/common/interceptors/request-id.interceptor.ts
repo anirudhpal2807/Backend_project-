@@ -17,10 +17,17 @@ export class RequestIdInterceptor implements NestInterceptor {
 
     res.header('X-Request-Id', requestId);
 
+    // Guards (JwtAuthGuard) run BEFORE interceptors, so req.user is already populated here.
+    // Carry the authenticated actor into the AsyncLocalStorage store, otherwise
+    // RequestContext.getUserId()/getRole() return undefined in controllers.
+    const user = (req as FastifyRequest & { user?: { id: string; role: string } }).user;
+
     const store = {
       requestId,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
+      actorId: user?.id,
+      actorRole: user?.role,
     };
 
     return new Observable(subscriber => {

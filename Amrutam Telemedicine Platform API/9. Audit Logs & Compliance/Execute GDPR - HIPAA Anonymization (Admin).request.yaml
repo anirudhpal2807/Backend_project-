@@ -1,0 +1,10 @@
+$kind: http-request
+name: Execute GDPR / HIPAA Anonymization (Admin)
+description: Permanently anonymizes user PII according to GDPR Right to be Forgotten while retaining cryptographically verifiable immutable audit records.
+url: "{{baseUrl}}/api/v1/audit/anonymize/:userId"
+method: POST
+pathVariables:
+  - key: userId
+    value: "{{userId}}"
+    description: User to anonymize
+order: 4000

@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/doctors/search?specialization=Ayurvedic%20Medicine&language=English&limit=10"
+method: GET
+order: 1000

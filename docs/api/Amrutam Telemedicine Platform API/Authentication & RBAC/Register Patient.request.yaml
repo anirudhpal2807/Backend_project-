@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+  Idempotency-Key: 018f673e-0001-7000-8000-000000000001
+body:
+  type: text
+  content: |-
+    {
+      "email": "patient.demo@amrutam.global",
+      "password": "Password123!Secure",
+      "role": "PATIENT"
+    }
+order: 1000

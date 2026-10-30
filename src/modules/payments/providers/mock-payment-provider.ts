@@ -37,6 +37,9 @@ export class MockPaymentProvider implements IPaymentProvider {
             amount: params.amount,
             currency: params.currency,
             status: 'REQUIRES_PAYMENT_METHOD',
+            orderId: intentId,
+            paymentSessionId: clientSecret,
+            provider: 'MOCK',
           };
         },
         { maxAttempts: 3, baseBackoffMs: 100 },

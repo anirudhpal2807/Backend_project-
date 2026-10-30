@@ -1,0 +1,28 @@
+$kind: http-request
+description: Doctor amends prescription, creating a versioned record while preserving original history.
+url: "{{baseUrl}}/api/v1/prescriptions/:id/amend"
+method: POST
+headers:
+  Content-Type: application/json
+  Idempotency-Key: "{{$guid}}"
+pathVariables:
+  - key: id
+    value: "{{prescriptionId}}"
+    description: Prescription UUID
+body:
+  type: json
+  content: |-
+    {
+      "items": [
+        {
+          "medicine_name": "Ashwagandharishta",
+          "dosage": "20ml twice daily",
+          "frequency": "After meals with equal parts warm water",
+          "duration_days": 45,
+          "instructions": "Increased dose for enhanced vitality."
+        }
+      ],
+      "instructions": "Continue modified diet regimen.",
+      "reason": "Patient demonstrated high tolerance and good digestive fire (Agni)."
+    }
+order: 2000

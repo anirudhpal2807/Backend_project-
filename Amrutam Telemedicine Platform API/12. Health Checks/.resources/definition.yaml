@@ -1,0 +1,3 @@
+$kind: collection
+description: Kubernetes liveness and readiness probes
+order: 13000

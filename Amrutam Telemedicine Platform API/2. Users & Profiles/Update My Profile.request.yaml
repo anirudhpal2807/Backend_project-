@@ -1,0 +1,17 @@
+$kind: http-request
+description: Update current user profile. Sensitive fields are AES-256-GCM encrypted before database storage.
+url: "{{baseUrl}}/api/v1/users/profile/me"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "firstName": "Aarav",
+      "lastName": "Sharma",
+      "phone": "+919876543210",
+      "dob": "1990-05-15",
+      "gender": "Male"
+    }
+order: 2000

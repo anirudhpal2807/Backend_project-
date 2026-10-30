@@ -1,0 +1,3 @@
+$kind: collection
+description: Cryptographically chained immutable audit log trail, verification, and GDPR anonymization
+order: 10000

@@ -1,0 +1,9 @@
+$kind: http-request
+description: Fetch consultation metadata. Patient and Doctor get decrypted clinical notes; Admin/Auditor get audited metadata only.
+url: "{{baseUrl}}/api/v1/consultations/:id"
+method: GET
+pathVariables:
+  - key: id
+    value: "{{consultationId}}"
+    description: Consultation UUID
+order: 4000

@@ -1,0 +1,16 @@
+$kind: http-request
+description: Create weekly recurring rule for doctor (0=Sunday ... 6=Saturday). Automatically materializes slots 30 days ahead.
+url: "{{baseUrl}}/api/v1/availability/rules"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "dayOfWeek": 1,
+      "startTime": "09:00",
+      "endTime": "13:00",
+      "slotDurationMinutes": 30
+    }
+order: 1000

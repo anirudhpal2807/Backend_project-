@@ -1,0 +1,9 @@
+$kind: http-request
+description: Retrieve prescription details. Patient and Doctor receive decrypted medicine items; Admin receives audit metadata only.
+url: "{{baseUrl}}/api/v1/prescriptions/:id"
+method: GET
+pathVariables:
+  - key: id
+    value: "{{prescriptionId}}"
+    description: Prescription UUID
+order: 3000

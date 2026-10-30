@@ -1,0 +1,18 @@
+$kind: http-request
+description: Doctor completes consultation. Tears down video session room and records duration.
+url: "{{baseUrl}}/api/v1/consultations/:id/complete"
+method: POST
+headers:
+  Content-Type: application/json
+  Idempotency-Key: "{{$guid}}"
+pathVariables:
+  - key: id
+    value: "{{consultationId}}"
+    description: Consultation UUID
+body:
+  type: json
+  content: |-
+    {
+      "summary": "Consultation completed successfully. Patient understands the 30-day rejuvenation protocol."
+    }
+order: 3000

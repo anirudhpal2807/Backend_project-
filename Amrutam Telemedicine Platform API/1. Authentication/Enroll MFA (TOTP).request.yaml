@@ -1,0 +1,5 @@
+$kind: http-request
+description: Enroll authenticated user in TOTP MFA. Returns QR code URI and secret.
+url: "{{baseUrl}}/api/v1/auth/mfa/enroll"
+method: POST
+order: 6000

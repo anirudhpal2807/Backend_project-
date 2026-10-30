@@ -56,10 +56,18 @@ describe('PaymentsService', () => {
       generate: jest.fn().mockReturnValue('mock-id'),
     };
 
+    const mockCashfreeProvider = {
+      isConfigured: jest.fn().mockReturnValue(false),
+      createIntent: jest.fn(),
+      verifyWebhookSignature: jest.fn(),
+      refund: jest.fn(),
+    } as any;
+
     paymentsService = new PaymentsService(
       mockDbService,
       mockUow,
       mockPaymentProvider,
+      mockCashfreeProvider,
       mockOutbox,
       mockLogger,
       mockIdGenerator,
@@ -160,6 +168,7 @@ describe('PaymentsService', () => {
       expect(result).toEqual({
         status: 'confirmed',
         consultationId: validPayload.data.metadata.consultation_id,
+        provider: 'MOCK_STRIPE',
       });
       expect(mockOutbox.publishInTransaction).toHaveBeenCalledWith(
         expect.anything(),
@@ -221,7 +230,7 @@ describe('PaymentsService', () => {
       expect(result.status).toBe('late_payment_refunded');
       expect(mockPaymentProvider.refund).toHaveBeenCalledWith(
         expect.objectContaining({
-          paymentIntentId: validPayload.data.id,
+          paymentIntentId: 'evt_123',
           amount: validPayload.data.amount,
         }),
       );

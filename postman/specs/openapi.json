@@ -1,0 +1,1638 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "HealthController_getLiveness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "HealthController_getReadiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Health"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Unique UUID to prevent duplicate user registrations",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Account registered successfully"
+          },
+          "409": {
+            "description": "Email address already exists"
+          }
+        },
+        "summary": "Register a new patient or doctor account",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns tokens or MFA challenge"
+          },
+          "401": {
+            "description": "Invalid email or password"
+          }
+        },
+        "summary": "Login with email and password",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/verify-login": {
+      "post": {
+        "operationId": "AuthController_verifyMfaLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MfaVerifyLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "MFA verified and tokens issued"
+          },
+          "401": {
+            "description": "Invalid MFA code"
+          }
+        },
+        "summary": "Verify MFA challenge with TOTP 6-digit code or backup code",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refreshToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New token pair issued"
+          },
+          "401": {
+            "description": "Invalid or reused refresh token"
+          }
+        },
+        "summary": "Rotate refresh token and obtain new short-lived access token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Session ended"
+          }
+        },
+        "summary": "Logout and revoke refresh token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/mfa/enroll": {
+      "post": {
+        "operationId": "AuthController_enrollMfa",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns TOTP secret and QR code URI"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Enroll current user in TOTP MFA",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/revoke-all-sessions": {
+      "post": {
+        "operationId": "AuthController_revokeAllSessions",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "All sessions revoked"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Revoke all active sessions and refresh tokens for current user",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/users/profile/me": {
+      "get": {
+        "operationId": "UsersController_getMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile retrieved"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Get current user profile (decrypted)",
+        "tags": [
+          "Users & Profiles"
+        ]
+      },
+      "put": {
+        "operationId": "UsersController_updateMyProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Update current user profile (field-level encrypted at rest)",
+        "tags": [
+          "Users & Profiles"
+        ]
+      }
+    },
+    "/api/v1/users/admin/list": {
+      "get": {
+        "operationId": "UsersController_adminListUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of users"
+          },
+          "403": {
+            "description": "Forbidden - requires ADMIN role"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "List all users (Admin only)",
+        "tags": [
+          "Users & Profiles"
+        ]
+      }
+    },
+    "/api/v1/users/admin/{id}": {
+      "patch": {
+        "operationId": "UsersController_adminUpdateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated"
+          },
+          "403": {
+            "description": "Forbidden - requires ADMIN role"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Activate/deactivate user or update role (Admin only)",
+        "tags": [
+          "Users & Profiles"
+        ]
+      }
+    },
+    "/api/v1/doctors/search": {
+      "get": {
+        "operationId": "DoctorsController_search",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Matching doctors returned"
+          }
+        },
+        "summary": "Search verified doctors with FTS, availability window, and Redis cache",
+        "tags": [
+          "Doctors"
+        ]
+      }
+    },
+    "/api/v1/doctors/onboard": {
+      "post": {
+        "operationId": "DoctorsController_onboard",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OnboardDoctorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Onboarding submitted"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Submit doctor onboarding information",
+        "tags": [
+          "Doctors"
+        ]
+      }
+    },
+    "/api/v1/doctors/admin/{id}/verify": {
+      "patch": {
+        "operationId": "DoctorsController_adminVerify",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminVerifyDoctorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Doctor verification status updated"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Admin verification of doctor (VERIFIED, REJECTED, SUSPENDED)",
+        "tags": [
+          "Doctors"
+        ]
+      }
+    },
+    "/api/v1/doctors/{id}/profile": {
+      "get": {
+        "operationId": "DoctorsController_getPublicProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor public profile"
+          }
+        },
+        "summary": "Get public profile of a verified doctor",
+        "tags": [
+          "Doctors"
+        ]
+      }
+    },
+    "/api/v1/availability/rules": {
+      "post": {
+        "operationId": "AvailabilityController_createRule",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAvailabilityRuleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rule created and 30-day slots materialized"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Create recurring weekly availability rule",
+        "tags": [
+          "Doctor Availability & Slots"
+        ]
+      }
+    },
+    "/api/v1/availability/doctors/{doctorId}/slots": {
+      "get": {
+        "operationId": "AvailabilityController_listDoctorSlots",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of OPEN slots"
+          }
+        },
+        "summary": "List public open availability slots for a doctor",
+        "tags": [
+          "Doctor Availability & Slots"
+        ]
+      }
+    },
+    "/api/v1/availability/slots/{slotId}/block": {
+      "post": {
+        "operationId": "AvailabilityController_blockSlot",
+        "parameters": [
+          {
+            "name": "slotId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Slot marked BLOCKED"
+          },
+          "409": {
+            "description": "Conflict - slot has active booking"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Doctor blocks an unbooked slot",
+        "tags": [
+          "Doctor Availability & Slots"
+        ]
+      }
+    },
+    "/api/v1/availability/slots/{slotId}/unblock": {
+      "post": {
+        "operationId": "AvailabilityController_unblockSlot",
+        "parameters": [
+          {
+            "name": "slotId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Slot reopened to OPEN"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "Doctor unblocks a previously blocked slot",
+        "tags": [
+          "Doctor Availability & Slots"
+        ]
+      }
+    },
+    "/api/v1/payments/intent": {
+      "post": {
+        "operationId": "PaymentsController_createPaymentIntent",
+        "parameters": [
+          {
+            "name": "idempotency-key",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Payment intent created"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a payment intent for held consultation (Idempotent)",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/payments/webhook": {
+      "post": {
+        "operationId": "PaymentsController_handleWebhook",
+        "parameters": [
+          {
+            "name": "x-signature",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook acknowledged"
+          }
+        },
+        "summary": "Provider payment webhook with HMAC verification and replay deduplication",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/bookings": {
+      "post": {
+        "operationId": "BookingsController_holdSlot",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Slot held successfully"
+          },
+          "409": {
+            "description": "Slot already held or booked, or patient overlap"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Hold an open slot for 10 minutes (Idempotent)",
+        "tags": [
+          "Bookings"
+        ]
+      }
+    },
+    "/api/v1/bookings/{id}/cancel": {
+      "post": {
+        "operationId": "BookingsController_cancelBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking cancelled successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel a booking with refund policy evaluation (Idempotent)",
+        "tags": [
+          "Bookings"
+        ]
+      }
+    },
+    "/api/v1/consultations/{id}/start": {
+      "post": {
+        "operationId": "ConsultationsController_startConsultation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation started"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start a consultation and provision video session (Idempotent)",
+        "tags": [
+          "Consultations"
+        ]
+      }
+    },
+    "/api/v1/consultations/{id}/notes": {
+      "patch": {
+        "operationId": "ConsultationsController_updateClinicalNotes",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinical notes saved"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update clinical notes with optimistic locking and AES-256-GCM encryption",
+        "tags": [
+          "Consultations"
+        ]
+      }
+    },
+    "/api/v1/consultations/{id}/complete": {
+      "post": {
+        "operationId": "ConsultationsController_completeConsultation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation completed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Complete a consultation and tear down video session (Idempotent)",
+        "tags": [
+          "Consultations"
+        ]
+      }
+    },
+    "/api/v1/consultations/{id}": {
+      "get": {
+        "operationId": "ConsultationsController_getConsultation",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Consultation details"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get consultation details with role-based clinical notes access",
+        "tags": [
+          "Consultations"
+        ]
+      }
+    },
+    "/api/v1/prescriptions": {
+      "post": {
+        "operationId": "PrescriptionsController_createPrescription",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Prescription created"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Issue a prescription with encrypted payload (Idempotent)",
+        "tags": [
+          "Prescriptions"
+        ]
+      }
+    },
+    "/api/v1/prescriptions/{id}/amend": {
+      "post": {
+        "operationId": "PrescriptionsController_amendPrescription",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Prescription amended"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Amend a prescription, creating a versioned record with history retained (Idempotent)",
+        "tags": [
+          "Prescriptions"
+        ]
+      }
+    },
+    "/api/v1/prescriptions/{id}": {
+      "get": {
+        "operationId": "PrescriptionsController_getPrescription",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prescription details"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get prescription (Patient/Doctor get decrypted items; Admin gets audited metadata only)",
+        "tags": [
+          "Prescriptions"
+        ]
+      }
+    },
+    "/api/v1/audit/logs": {
+      "get": {
+        "operationId": "AuditController_listLogs",
+        "parameters": [
+          {
+            "name": "actor_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actor_role",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor role",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "Filter by action name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_type",
+            "required": false,
+            "in": "query",
+            "description": "Filter by resource type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by resource ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "required": false,
+            "in": "query",
+            "description": "Filter by outcome (SUCCESS/FAILURE)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter logs on or after this ISO date",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter logs on or before this ISO date",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size (1-100)",
+            "schema": {
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Keyset cursor for pagination",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated audit trail entries"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Query immutable audit logs with keyset pagination (Auditor/Admin only)",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/api/v1/audit/verify-chain": {
+      "post": {
+        "operationId": "AuditController_verifyChain",
+        "parameters": [
+          {
+            "name": "from_date",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cryptographic hash-chain integrity verification result"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify cryptographic hash chain integrity of audit logs",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/api/v1/audit/export": {
+      "get": {
+        "operationId": "AuditController_exportLogs",
+        "parameters": [
+          {
+            "name": "actor_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actor_role",
+            "required": false,
+            "in": "query",
+            "description": "Filter by actor role",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "action",
+            "required": false,
+            "in": "query",
+            "description": "Filter by action name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_type",
+            "required": false,
+            "in": "query",
+            "description": "Filter by resource type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "resource_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by resource ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outcome",
+            "required": false,
+            "in": "query",
+            "description": "Filter by outcome (SUCCESS/FAILURE)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter logs on or after this ISO date",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter logs on or before this ISO date",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Page size (1-100)",
+            "schema": {
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Keyset cursor for pagination",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit logs export payload with verification checksum"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export audit logs with SHA-256 integrity checksum",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/api/v1/audit/anonymize/{userId}": {
+      "post": {
+        "operationId": "AuditController_anonymizeUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile anonymized with immutable audit trail recorded"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Execute user GDPR/HIPAA anonymization/erasure request (Admin only)",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
+    "/api/v1/analytics/summary": {
+      "get": {
+        "operationId": "AnalyticsController_getSummary",
+        "parameters": [
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-28",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "required": false,
+            "in": "query",
+            "description": "Dimension type (e.g. TOTAL, SPECIALIZATION)",
+            "schema": {
+              "default": "TOTAL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension_value",
+            "required": false,
+            "in": "query",
+            "description": "Dimension value (e.g. ALL, Ayurveda)",
+            "schema": {
+              "default": "ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Summary KPI metrics"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get high-level platform KPI summary from pre-aggregated rollups",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/funnel": {
+      "get": {
+        "operationId": "AnalyticsController_getFunnel",
+        "parameters": [
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-28",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "required": false,
+            "in": "query",
+            "description": "Dimension type (e.g. TOTAL, SPECIALIZATION)",
+            "schema": {
+              "default": "TOTAL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension_value",
+            "required": false,
+            "in": "query",
+            "description": "Dimension value (e.g. ALL, Ayurveda)",
+            "schema": {
+              "default": "ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking conversion funnel steps"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get consultation booking conversion funnel",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/revenue": {
+      "get": {
+        "operationId": "AnalyticsController_getRevenue",
+        "parameters": [
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-28",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "required": false,
+            "in": "query",
+            "description": "Dimension type (e.g. TOTAL, SPECIALIZATION)",
+            "schema": {
+              "default": "TOTAL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension_value",
+            "required": false,
+            "in": "query",
+            "description": "Dimension value (e.g. ALL, Ayurveda)",
+            "schema": {
+              "default": "ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily revenue breakdown"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get daily revenue and refund metrics",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/utilization": {
+      "get": {
+        "operationId": "AnalyticsController_getUtilization",
+        "parameters": [
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-28",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "required": false,
+            "in": "query",
+            "description": "Dimension type (e.g. TOTAL, SPECIALIZATION)",
+            "schema": {
+              "default": "TOTAL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension_value",
+            "required": false,
+            "in": "query",
+            "description": "Dimension value (e.g. ALL, Ayurveda)",
+            "schema": {
+              "default": "ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily slot utilization breakdown"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get doctor slot utilization metrics",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/refresh": {
+      "post": {
+        "operationId": "AnalyticsController_refreshRollup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRollupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rollup refresh result"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Trigger on-demand idempotent rollup calculation for a calendar date",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/analytics/export/csv": {
+      "get": {
+        "operationId": "AnalyticsController_exportCsv",
+        "parameters": [
+          {
+            "name": "from_date",
+            "required": false,
+            "in": "query",
+            "description": "Start date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to_date",
+            "required": false,
+            "in": "query",
+            "description": "End date (YYYY-MM-DD)",
+            "schema": {
+              "example": "2026-10-28",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension",
+            "required": false,
+            "in": "query",
+            "description": "Dimension type (e.g. TOTAL, SPECIALIZATION)",
+            "schema": {
+              "default": "TOTAL",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dimension_value",
+            "required": false,
+            "in": "query",
+            "description": "Dimension value (e.g. ALL, Ayurveda)",
+            "schema": {
+              "default": "ALL",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV export payload"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export pre-aggregated analytics rollups as RFC 4180 CSV",
+        "tags": [
+          "Analytics"
+        ]
+      }
+    },
+    "/api/v1/metrics": {
+      "get": {
+        "operationId": "MetricsController_getMetrics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Prometheus standard exposition text format"
+          }
+        },
+        "summary": "Prometheus metrics scraping endpoint",
+        "tags": [
+          "Observability"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Amrutam Telemedicine API",
+    "description": "Production-grade modular monolith backend for the Amrutam Telemedicine Platform. Implements RFC 7807 problem details, AES-256-GCM envelope encryption for PHI, rotating token families, slot hold reservation sagas, and zero double-booking guarantees.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Amrutam Telemedicine Engineering",
+      "url": "https://amrutam.global",
+      "email": "engineering@amrutam.global"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://amrutam.global/terms"
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "User registration, login, rotating refresh tokens, and TOTP MFA"
+    },
+    {
+      "name": "Users",
+      "description": "User profile management with AES-256-GCM encrypted PII fields"
+    },
+    {
+      "name": "Doctors",
+      "description": "Doctor profile onboarding, verification, and slot management"
+    },
+    {
+      "name": "Availability",
+      "description": "Materialized slot generation, slot blocking, and queries"
+    },
+    {
+      "name": "Consultations",
+      "description": "Booking saga, consultation lifecycle, and Daily.co video room integration"
+    },
+    {
+      "name": "Prescriptions",
+      "description": "Versioned immutable medical prescriptions with cryptographic hash signatures"
+    },
+    {
+      "name": "Payments",
+      "description": "Stripe payment intent creation and idempotent webhook processing"
+    },
+    {
+      "name": "Audit",
+      "description": "Cryptographically hash-chained immutable audit log queries and GDPR export"
+    },
+    {
+      "name": "Analytics",
+      "description": "Pre-aggregated analytical rollups (revenue, utilization, funnel) with Redis caching"
+    },
+    {
+      "name": "Metrics",
+      "description": "Prometheus RED metrics scraper endpoint"
+    },
+    {
+      "name": "Health",
+      "description": "Kubernetes liveness and readiness probes"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "Authorization",
+        "description": "Provide your JWT bearer access token",
+        "in": "header"
+      },
+      "Idempotency-Key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Idempotency-Key",
+        "description": "Unique UUID v4 or v7 key for mutation deduplication and replay protection"
+      }
+    },
+    "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "MfaVerifyLoginDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "AdminUpdateUserDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "OnboardDoctorDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "AdminVerifyDoctorDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateAvailabilityRuleDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "RefreshRollupDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Date to refresh (YYYY-MM-DD)",
+            "example": "2026-10-27"
+          }
+        }
+      }
+    }
+  }
+}

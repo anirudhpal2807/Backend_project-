@@ -1,0 +1,11 @@
+$kind: http-request
+description: Get verified doctor public profile.
+url: "{{baseUrl}}/api/v1/doctors/:id/profile"
+method: GET
+pathVariables:
+  - key: id
+    value: "{{doctorId}}"
+    description: Doctor ID
+auth:
+  type: noauth
+order: 2000

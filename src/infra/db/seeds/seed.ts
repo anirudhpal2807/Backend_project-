@@ -73,7 +73,12 @@ async function runSeed() {
       await client.query(
         `INSERT INTO doctors (id, user_id, license_number, experience_years, consultation_fee, status, languages, bio)
          VALUES ($1, $2, 'AYUR-IN-2024-9872', 12, 500.00, 'VERIFIED', ARRAY['English', 'Hindi', 'Sanskrit'], 'Senior Ayurvedic Vaidya specializing in Panchakarma and lifestyle disorders.')
-         ON CONFLICT (license_number) DO NOTHING`,
+         ON CONFLICT (user_id) DO UPDATE 
+         SET status = 'VERIFIED',
+             experience_years = 12,
+             consultation_fee = 500.00,
+             languages = ARRAY['English', 'Hindi', 'Sanskrit'],
+             bio = 'Senior Ayurvedic Vaidya specializing in Panchakarma and lifestyle disorders.'`,
         [doctorId, verifiedDoctorUserId],
       );
 

@@ -1,0 +1,38 @@
+$kind: http-request
+description: Authenticate user. Automatically updates {{accessToken}} and {{refreshToken}} in Postman collection variables on success.
+url: "{{baseUrl}}/api/v1/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "patient.demo@example.com",
+      "password": "SecurePass123!"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      if (pm.response.code === 200) {
+          var json = pm.response.json();
+          if (json.accessToken) {
+              pm.collectionVariables.set('accessToken', json.accessToken);
+              console.log('accessToken updated:', json.accessToken);
+          }
+          if (json.refreshToken) {
+              pm.collectionVariables.set('refreshToken', json.refreshToken);
+              console.log('refreshToken updated:', json.refreshToken);
+          }
+          if (json.mfaToken) {
+              pm.collectionVariables.set('mfaToken', json.mfaToken);
+              console.log('MFA required. mfaToken stored.');
+          }
+          if (json.user && json.user.id) {
+              pm.collectionVariables.set('userId', json.user.id);
+          }
+      }
+    language: text/javascript
+order: 3000

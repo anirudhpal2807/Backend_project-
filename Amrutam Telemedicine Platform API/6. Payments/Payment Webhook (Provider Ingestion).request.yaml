@@ -1,0 +1,30 @@
+$kind: http-request
+description: Webhook handler with replay deduplication and cryptographic signature check. Transitions consultation from HELD to CONFIRMED.
+url: "{{baseUrl}}/api/v1/payments/webhook"
+method: POST
+headers:
+  - key: Content-Type
+    value: application/json
+  - key: x-signature
+    value: mock-hmac-sha256-signature-header-value
+    description: HMAC signature for webhook authenticity
+body:
+  type: json
+  content: |-
+    {
+      "id": "evt_test_123456789",
+      "type": "payment_intent.succeeded",
+      "created": 1730200000,
+      "data": {
+        "id": "pi_stripe_sample_987654",
+        "amount": 80000,
+        "currency": "INR",
+        "metadata": {
+          "consultation_id": "{{consultationId}}",
+          "patient_id": "{{userId}}"
+        }
+      }
+    }
+auth:
+  type: noauth
+order: 2000

@@ -23,6 +23,7 @@ import { CommonPlatformModule } from './common/common-platform.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { RequestIdInterceptor } from './common/interceptors/request-id.interceptor';
 import { IdempotencyInterceptor } from './common/idempotency/idempotency.interceptor';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { IdempotencyInterceptor } from './common/idempotency/idempotency.interce
     AnalyticsModule,
     ObservabilityModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,

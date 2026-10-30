@@ -1,0 +1,1738 @@
+{
+  "info": {
+    "_postman_id": "7f8c9b21-3e4a-4d92-b5e1-8f24a0d8101a",
+    "name": "Amrutam Telemedicine Platform API",
+    "description": "# Amrutam Telemedicine Platform \u2014 Complete API Collection\n\nProduction-grade Postman collection for the Amrutam Telemedicine backend.\n\n### Features\n- **Pre-configured Auth**: Bearer token authentication configured at the collection level.\n- **Automated Token Capture**: Login and Register requests auto-save `accessToken`, `refreshToken`, and `userId` directly into Collection variables.\n- **Automatic UUID Generation**: All mutation endpoints requiring `Idempotency-Key` dynamically inject `{{$guid}}`.\n- **All Modules Included**: Auth, Users, Doctors, Availability, Bookings, Payments, Consultations, Prescriptions, Audit, Analytics, Metrics, and Health.\n\n### Default Seed Credentials (Localhost)\n- **Patient**: `patient@amrutam.global` / `PatientPassword123!`\n- **Doctor**: `dr.ayurveda@amrutam.global` / `DoctorPassword123!`\n- **Admin**: `admin@amrutam.global` / `AdminPassword123!`\n- **Auditor**: `auditor@amrutam.global` / `AuditorPassword123!`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "apiPrefix",
+      "value": "api/v1",
+      "type": "string"
+    },
+    {
+      "key": "nestedApiPrefix",
+      "value": "api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "mfaToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "00000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "doctorId",
+      "value": "00000000-0000-0000-0000-000000000002",
+      "type": "string"
+    },
+    {
+      "key": "slotId",
+      "value": "00000000-0000-0000-0000-000000000003",
+      "type": "string"
+    },
+    {
+      "key": "bookingId",
+      "value": "00000000-0000-0000-0000-000000000004",
+      "type": "string"
+    },
+    {
+      "key": "consultationId",
+      "value": "00000000-0000-0000-0000-000000000005",
+      "type": "string"
+    },
+    {
+      "key": "prescriptionId",
+      "value": "00000000-0000-0000-0000-000000000006",
+      "type": "string"
+    },
+    {
+      "key": "webhookSecret",
+      "value": "mock-payment-webhook-secret-32-bytes-long",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health & Discovery",
+      "item": [
+        {
+          "name": "API Root / Discovery",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1"
+              ]
+            },
+            "description": "Platform status and API discovery endpoint."
+          },
+          "response": []
+        },
+        {
+          "name": "Liveness Probe",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health/live",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health",
+                "live"
+              ]
+            },
+            "description": "Kubernetes liveness probe."
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness Probe",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health/ready",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health",
+                "ready"
+              ]
+            },
+            "description": "Kubernetes readiness probe checking database & redis connectivity."
+          },
+          "response": []
+        },
+        {
+          "name": "Prometheus Metrics",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "metrics"
+              ]
+            },
+            "description": "Scrapes real-time RED Prometheus metrics."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Register User (Patient / Doctor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    const uId = data.userId || (data.user && data.user.id);",
+                  "    if (uId) {",
+                  "        pm.collectionVariables.set('userId', uId);",
+                  "        try { pm.environment.set('userId', uId); } catch(e) {}",
+                  "        console.log('Registered User ID captured:', uId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}",
+                "description": "UUID v4 mutation idempotency key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient.demo@amrutam.global\",\n  \"password\": \"Password123!Secure\",\n  \"role\": \"PATIENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new patient or doctor account with Argon2id password hashing."
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const tokenObj = data.tokens || data;",
+                  "    function setVar(k, v) {",
+                  "        if (!v) return;",
+                  "        pm.collectionVariables.set(k, v);",
+                  "        try { pm.environment.set(k, v); } catch(e) {}",
+                  "    }",
+                  "    setVar('accessToken', tokenObj.accessToken);",
+                  "    setVar('refreshToken', tokenObj.refreshToken);",
+                  "    setVar('mfaToken', data.mfaToken || data.tempToken);",
+                  "    setVar('userId', data.user && data.user.id);",
+                  "    console.log('Login succeeded; variables saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"patient.demo@example.com\",\n  \"password\": \"AmrutamSecurePass2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email & password. If user has MFA enabled, returns mfaToken/tempToken."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Seeded Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const tokenObj = data.tokens || data;",
+                  "    function setVar(k, v) {",
+                  "        if (!v) return;",
+                  "        pm.collectionVariables.set(k, v);",
+                  "        try { pm.environment.set(k, v); } catch(e) {}",
+                  "    }",
+                  "    setVar('accessToken', tokenObj.accessToken);",
+                  "    setVar('refreshToken', tokenObj.refreshToken);",
+                  "    setVar('mfaToken', data.mfaToken || data.tempToken);",
+                  "    setVar('userId', data.user && data.user.id);",
+                  "    console.log('Admin login captured; mfaToken or tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@amrutam.global\",\n  \"password\": \"AmrutamSecurePass2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login as platform administrator."
+          },
+          "response": []
+        },
+        {
+          "name": "Login as Seeded Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const tokenObj = data.tokens || data;",
+                  "    function setVar(k, v) {",
+                  "        if (!v) return;",
+                  "        pm.collectionVariables.set(k, v);",
+                  "        try { pm.environment.set(k, v); } catch(e) {}",
+                  "    }",
+                  "    setVar('accessToken', tokenObj.accessToken);",
+                  "    setVar('refreshToken', tokenObj.refreshToken);",
+                  "    setVar('mfaToken', data.mfaToken || data.tempToken);",
+                  "    setVar('userId', data.user && data.user.id);",
+                  "    console.log('Doctor login captured; mfaToken or tokens saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"dr.sharma@amrutam.global\",\n  \"password\": \"AmrutamSecurePass2026!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login as verified doctor."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify MFA Challenge",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const tokenObj = data.tokens || data;",
+                  "    function setVar(k, v) {",
+                  "        if (!v) return;",
+                  "        pm.collectionVariables.set(k, v);",
+                  "        try { pm.environment.set(k, v); } catch(e) {}",
+                  "    }",
+                  "    setVar('accessToken', tokenObj.accessToken);",
+                  "    setVar('refreshToken', tokenObj.refreshToken);",
+                  "    console.log('MFA verified: accessToken and refreshToken saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mfaToken\": \"{{mfaToken}}\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/mfa/verify-login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "mfa",
+                "verify-login"
+              ]
+            },
+            "description": "Verify MFA challenge with TOTP 6-digit code or backup code."
+          },
+          "response": []
+        },
+        {
+          "name": "Rotate Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const tokenObj = data.tokens || data;",
+                  "    function setVar(k, v) {",
+                  "        if (!v) return;",
+                  "        pm.collectionVariables.set(k, v);",
+                  "        try { pm.environment.set(k, v); } catch(e) {}",
+                  "    }",
+                  "    setVar('accessToken', tokenObj.accessToken);",
+                  "    setVar('refreshToken', tokenObj.refreshToken);",
+                  "    console.log('Refresh token rotated; tokens updated');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Rotate refresh token family and obtain new short-lived access token."
+          },
+          "response": []
+        },
+        {
+          "name": "Enroll Current User in TOTP MFA",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/mfa/enroll",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "mfa",
+                "enroll"
+              ]
+            },
+            "description": "Returns TOTP secret and QR code URI for authenticator app enrollment."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke All Sessions",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/revoke-all-sessions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "revoke-all-sessions"
+              ]
+            },
+            "description": "Revoke all active sessions and refresh tokens for current user."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout Session",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes specified refresh token family."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Users & Profiles",
+      "item": [
+        {
+          "name": "Get My Profile (Decrypted)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile",
+                "me"
+              ]
+            },
+            "description": "Get current user profile with decrypted PII fields."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Aarav\",\n  \"lastName\": \"Sharma\",\n  \"phone\": \"+919876543210\",\n  \"dob\": \"1992-08-20\",\n  \"gender\": \"male\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile",
+                "me"
+              ]
+            },
+            "description": "Update current profile (fields are encrypted at rest with AES-256-GCM)."
+          },
+          "response": []
+        },
+        {
+          "name": "List All Users (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/admin/list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "admin",
+                "list"
+              ]
+            },
+            "description": "Admin listing of all platform accounts."
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Update User Status / Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true,\n  \"role\": \"PATIENT\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/admin/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "admin",
+                "{{userId}}"
+              ]
+            },
+            "description": "Admin modification of user role and active state."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Doctors",
+      "item": [
+        {
+          "name": "Search Doctors (Cache-Aside & FTS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const docList = data.items || data.doctors || (Array.isArray(data) ? data : []);",
+                  "    if (docList.length > 0) {",
+                  "        const id = docList[0].id || docList[0].doctor_id;",
+                  "        pm.collectionVariables.set('doctorId', id);",
+                  "        try { pm.environment.set('doctorId', id); } catch(e) {}",
+                  "        console.log('Doctor ID captured:', id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/search?specialization=Ayurveda&language=English&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctors",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "specialization",
+                  "value": "Ayurveda"
+                },
+                {
+                  "key": "language",
+                  "value": "English"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search verified doctors with full-text search and Redis caching."
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Doctor Onboarding",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenseNumber\": \"AYU-MED-98765\",\n  \"experienceYears\": 10,\n  \"consultationFee\": 75000,\n  \"languages\": [\"English\", \"Hindi\"],\n  \"specializations\": [\"Ayurveda\", \"Panchakarma\"],\n  \"bio\": \"Specialist in classical Ayurvedic medicine and lifestyle wellness.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/onboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctors",
+                "onboard"
+              ]
+            },
+            "description": "Doctor account submits profile and credentials for administrative verification."
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Verify Doctor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"VERIFIED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/admin/{{doctorId}}/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctors",
+                "admin",
+                "{{doctorId}}",
+                "verify"
+              ]
+            },
+            "description": "Admin verifies (or rejects/suspends) doctor onboarding submission."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Doctor Public Profile",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/doctors/{{doctorId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "doctors",
+                "{{doctorId}}",
+                "profile"
+              ]
+            },
+            "description": "Public profile details of a verified practitioner."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Availability & Slots",
+      "item": [
+        {
+          "name": "Create Availability Rule (Doctor Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dayOfWeek\": 1,\n  \"startTime\": \"09:00\",\n  \"endTime\": \"17:00\",\n  \"slotDurationMinutes\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/availability/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "availability",
+                "rules"
+              ]
+            },
+            "description": "Create weekly recurring rule and materialize 30-day slot windows backed by GiST constraints."
+          },
+          "response": []
+        },
+        {
+          "name": "List Open Slots for Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    const slots = Array.isArray(data) ? data : (data.slots || data.items || []);",
+                  "    if (slots.length > 0) {",
+                  "        const sId = slots[0].id || slots[0].slot_id;",
+                  "        pm.collectionVariables.set('slotId', sId);",
+                  "        try { pm.environment.set('slotId', sId); } catch(e) {}",
+                  "        console.log('Slot ID auto-captured:', sId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/availability/doctors/{{doctorId}}/slots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "availability",
+                "doctors",
+                "{{doctorId}}",
+                "slots"
+              ]
+            },
+            "description": "Public query of available OPEN slots for patient booking."
+          },
+          "response": []
+        },
+        {
+          "name": "Block Slot (Doctor Only)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/availability/slots/{{slotId}}/block",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "availability",
+                "slots",
+                "{{slotId}}",
+                "block"
+              ]
+            },
+            "description": "Doctor marks unbooked slot as BLOCKED."
+          },
+          "response": []
+        },
+        {
+          "name": "Unblock Slot (Doctor Only)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/availability/slots/{{slotId}}/unblock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "availability",
+                "slots",
+                "{{slotId}}",
+                "unblock"
+              ]
+            },
+            "description": "Doctor reopens a previously blocked slot to OPEN."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Bookings",
+      "item": [
+        {
+          "name": "Hold Open Slot (10-Minute Hold TTL)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    const cId = data.consultation_id || data.consultationId;",
+                  "    if (cId) {",
+                  "        pm.collectionVariables.set('consultationId', cId);",
+                  "        pm.collectionVariables.set('bookingId', cId);",
+                  "        try { pm.environment.set('consultationId', cId); } catch(e) {}",
+                  "        try { pm.environment.set('bookingId', cId); } catch(e) {}",
+                  "        console.log('Consultation & Booking ID captured:', cId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}",
+                "description": "Idempotency mutation key"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slot_id\": \"{{slotId}}\",\n  \"notes\": \"Initial telemedicine consultation for chronic wellness\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            },
+            "description": "Atomically holds an OPEN slot for 10 minutes using SELECT FOR UPDATE with zero double-booking guarantee."
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Schedule conflict; requested cancellation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/bookings/{{bookingId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{bookingId}}",
+                "cancel"
+              ]
+            },
+            "description": "Cancels a held or confirmed booking, evaluating refund policies idempotently."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Payments",
+      "item": [
+        {
+          "name": "Create Payment Intent (Idempotent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultation_id\": \"{{consultationId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/intent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "intent"
+              ]
+            },
+            "description": "Generates a Stripe / provider payment intent for a held slot consultation."
+          },
+          "response": []
+        },
+        {
+          "name": "Payment Webhook (Simulate Succeeded)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-signature",
+                "value": "{{computed-in-pre-request}}",
+                "description": "Provider HMAC signature"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_mock_{{$timestamp}}\",\n  \"type\": \"payment_intent.succeeded\",\n  \"created\": 1730000000,\n  \"data\": {\n    \"id\": \"pi_mock_{{$timestamp}}\",\n    \"amount\": 75000,\n    \"currency\": \"INR\",\n    \"metadata\": {\n      \"consultation_id\": \"{{consultationId}}\",\n      \"patient_id\": \"{{userId}}\"\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/payments/webhook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "payments",
+                "webhook"
+              ]
+            },
+            "description": "Provider webhook handling with HMAC verification and replay deduplication."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Server verifies HMAC-SHA256(JSON.stringify(body), PAYMENT_WEBHOOK_SECRET) and rejects 'created' older than 5 min.",
+                  "const now = Math.floor(Date.now() / 1000);",
+                  "const payload = {",
+                  "  id: 'evt_mock_' + now,",
+                  "  type: 'payment_intent.succeeded',",
+                  "  created: now,",
+                  "  data: {",
+                  "    id: 'pi_mock_' + now,",
+                  "    amount: 75000,",
+                  "    currency: 'INR',",
+                  "    metadata: {",
+                  "      consultation_id: pm.variables.get('consultationId'),",
+                  "      patient_id: pm.variables.get('userId')",
+                  "    }",
+                  "  }",
+                  "};",
+                  "const bodyStr = JSON.stringify(payload);",
+                  "const secret = pm.variables.get('webhookSecret') || 'mock-payment-webhook-secret-32-bytes-long';",
+                  "const sig = CryptoJS.HmacSHA256(bodyStr, secret).toString(CryptoJS.enc.Hex);",
+                  "pm.request.body.update(bodyStr);",
+                  "pm.request.headers.upsert({ key: 'x-signature', value: sig });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Consultations",
+      "item": [
+        {
+          "name": "Get Consultation Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultations/{{consultationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "consultations",
+                "{{consultationId}}"
+              ]
+            },
+            "description": "Fetches consultation details. Clinical notes are only returned to participating Doctor & Patient."
+          },
+          "response": []
+        },
+        {
+          "name": "Start Consultation (Video Room Provision)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultations/{{consultationId}}/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "consultations",
+                "{{consultationId}}",
+                "start"
+              ]
+            },
+            "description": "Transitions state to IN_PROGRESS and provisions Daily.co video room credentials."
+          },
+          "response": []
+        },
+        {
+          "name": "Save Encrypted Clinical Notes (Optimistic Lock)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Patient reports improved energy. Vata dosha balancing protocol initiated with diet regimen.\",\n  \"version\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultations/{{consultationId}}/notes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "consultations",
+                "{{consultationId}}",
+                "notes"
+              ]
+            },
+            "description": "Updates notes encrypted with AES-256-GCM. Optimistic concurrency version check prevents overwrite conflicts."
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Consultation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"summary\": \"Consultation successfully completed with prescription issued.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultations/{{consultationId}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "consultations",
+                "{{consultationId}}",
+                "complete"
+              ]
+            },
+            "description": "Concludes consultation and tears down video session room."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Prescriptions",
+      "item": [
+        {
+          "name": "Issue Immutable Prescription",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    if (data.id) {",
+                  "        pm.collectionVariables.set('prescriptionId', data.id);",
+                  "        try { pm.environment.set('prescriptionId', data.id); } catch(e) {}",
+                  "        console.log('Prescription ID captured:', data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultation_id\": \"{{consultationId}}\",\n  \"items\": [\n    {\n      \"medicine_name\": \"Ashwagandha Churna\",\n      \"dosage\": \"500mg\",\n      \"frequency\": \"Twice daily with warm milk\",\n      \"duration_days\": 30,\n      \"instructions\": \"Take 30 minutes after meals\"\n    },\n    {\n      \"medicine_name\": \"Triphala Tablets\",\n      \"dosage\": \"250mg\",\n      \"frequency\": \"Once daily at bedtime\",\n      \"duration_days\": 15,\n      \"instructions\": \"Take with warm water\"\n    }\n  ],\n  \"instructions\": \"Avoid cold, oily foods. Prioritize fresh, warm meals.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/prescriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prescriptions"
+              ]
+            },
+            "description": "Issues version 1 immutable medical prescription with cryptographic SHA-256 integrity hash."
+          },
+          "response": []
+        },
+        {
+          "name": "Amend Prescription (Versioned Audit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{$guid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"medicine_name\": \"Ashwagandha Churna\",\n      \"dosage\": \"750mg\",\n      \"frequency\": \"Twice daily with warm milk\",\n      \"duration_days\": 45,\n      \"instructions\": \"Dosage increased after tolerance evaluation\"\n    }\n  ],\n  \"instructions\": \"Avoid cold, oily foods. Prioritize fresh, warm meals.\",\n  \"reason\": \"Dosage escalation based on patient follow-up progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/prescriptions/{{prescriptionId}}/amend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prescriptions",
+                "{{prescriptionId}}",
+                "amend"
+              ]
+            },
+            "description": "Creates incremented version record retaining full history of prior version."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Prescription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/prescriptions/{{prescriptionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "prescriptions",
+                "{{prescriptionId}}"
+              ]
+            },
+            "description": "Decrypted items for patient & doctor; audited metadata only for administrative roles."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Audit Ledger & Governance",
+      "item": [
+        {
+          "name": "Query Audit Logs (Keyset Pagination)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/audit/logs?limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Auditor/Admin query of append-only audit trail."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Cryptographic Hash Chain",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/audit/verify-chain?from_date=2026-10-01&to_date=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "verify-chain"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Mathematically verifies SHA-256 HMAC integrity from genesis hash through ledger head."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Audit Logs with Checksum",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/audit/export?limit=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Audit trail export containing payload checksum for compliance reviews."
+          },
+          "response": []
+        },
+        {
+          "name": "GDPR / HIPAA User Anonymization",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/audit/anonymize/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "audit",
+                "anonymize",
+                "{{userId}}"
+              ]
+            },
+            "description": "Admin erasure request that cryptographic scrubs user PII while preserving immutable audit logs."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11. Analytics & Reporting",
+      "item": [
+        {
+          "name": "KPI Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/summary?from_date=2026-10-01&to_date=2026-10-31&dimension=TOTAL&dimension_value=ALL",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-10-31"
+                },
+                {
+                  "key": "dimension",
+                  "value": "TOTAL"
+                },
+                {
+                  "key": "dimension_value",
+                  "value": "ALL"
+                }
+              ]
+            },
+            "description": "Pre-aggregated platform KPIs (revenue, slots, cancellations, utilization)."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultation Conversion Funnel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/funnel?from_date=2026-10-01&to_date=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "funnel"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Funnel analysis from slot browse -> hold -> payment -> completion."
+          },
+          "response": []
+        },
+        {
+          "name": "Revenue Breakdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/revenue?from_date=2026-10-01&to_date=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "revenue"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Daily gross and net revenue metrics with refund deductions."
+          },
+          "response": []
+        },
+        {
+          "name": "Slot Utilization",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/utilization?from_date=2026-10-01&to_date=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "utilization"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Doctor schedule capacity vs booked ratio."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Rollup Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-10-28\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "refresh"
+              ]
+            },
+            "description": "Triggers on-demand idempotent rollup recomputation."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Analytics as CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/analytics/export/csv?from_date=2026-10-01&to_date=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "analytics",
+                "export",
+                "csv"
+              ],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to_date",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "RFC 4180 compliant CSV export for spreadsheet analytics."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

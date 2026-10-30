@@ -1,0 +1,18 @@
+$kind: http-request
+description: List all unbooked OPEN availability slots for a doctor.
+url: "{{baseUrl}}/api/v1/availability/doctors/:doctorId/slots?startDate=2026-10-30&endDate=2026-11-15"
+method: GET
+queryParams:
+  - key: startDate
+    value: 2026-10-30
+    description: Start ISO date
+  - key: endDate
+    value: 2026-11-15
+    description: End ISO date
+pathVariables:
+  - key: doctorId
+    value: "{{doctorId}}"
+    description: Doctor ID
+auth:
+  type: noauth
+order: 2000

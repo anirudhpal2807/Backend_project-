@@ -1,0 +1,9 @@
+$kind: http-request
+description: Doctor unblocks a previously blocked slot back to OPEN.
+url: "{{baseUrl}}/api/v1/availability/slots/:slotId/unblock"
+method: POST
+pathVariables:
+  - key: slotId
+    value: "{{slotId}}"
+    description: Slot UUID to reopen
+order: 4000

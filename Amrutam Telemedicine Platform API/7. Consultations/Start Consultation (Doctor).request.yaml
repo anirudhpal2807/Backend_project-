@@ -1,0 +1,11 @@
+$kind: http-request
+description: Doctor starts consultation. Provisions video call room (Daily.co) and emits audit log.
+url: "{{baseUrl}}/api/v1/consultations/:id/start"
+method: POST
+headers:
+  Idempotency-Key: "{{$guid}}"
+pathVariables:
+  - key: id
+    value: "{{consultationId}}"
+    description: Consultation UUID
+order: 1000

@@ -21,7 +21,7 @@ import { ErrorCode } from '../../common/errors/error-codes';
 import { Idempotent } from '../../common/idempotency/idempotency.decorator';
 
 @ApiTags('Consultations')
-@Controller('api/v1/consultations')
+@Controller('consultations')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class ConsultationsController {

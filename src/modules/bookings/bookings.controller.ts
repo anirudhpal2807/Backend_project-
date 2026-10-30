@@ -11,7 +11,7 @@ import { ErrorCode } from '../../common/errors/error-codes';
 import { Idempotent } from '../../common/idempotency/idempotency.decorator';
 
 @ApiTags('Bookings')
-@Controller('api/v1/bookings')
+@Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 

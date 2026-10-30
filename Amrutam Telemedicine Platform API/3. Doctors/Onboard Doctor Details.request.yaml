@@ -1,0 +1,18 @@
+$kind: http-request
+description: Submit doctor profile details for verification (Doctor role required).
+url: "{{baseUrl}}/api/v1/doctors/onboard"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "licenseNumber": "AYUR-DL-2024-98765",
+      "experienceYears": 8,
+      "consultationFee": 800,
+      "languages": ["Hindi", "English"],
+      "specializations": ["Ayurveda", "Panchakarma", "Holistic Wellness"],
+      "bio": "Senior Ayurvedic consultant specializing in lifestyle diseases and Panchakarma detoxification."
+    }
+order: 3000

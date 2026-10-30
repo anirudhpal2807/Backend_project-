@@ -1,0 +1,18 @@
+$kind: http-request
+name: "Admin: Verify Doctor Profile"
+description: Admin changes doctor status to VERIFIED, REJECTED, or SUSPENDED.
+url: "{{baseUrl}}/api/v1/doctors/admin/:id/verify"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  - key: id
+    value: "{{doctorId}}"
+    description: Doctor ID
+body:
+  type: json
+  content: |-
+    {
+      "status": "VERIFIED"
+    }
+order: 4000

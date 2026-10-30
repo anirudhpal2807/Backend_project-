@@ -1,0 +1,8 @@
+$kind: http-request
+description: Exports pre-aggregated rollup metrics formatted as RFC 4180 CSV.
+url: "{{baseUrl}}/api/v1/analytics/export/csv?from_date=2026-10-01&to_date=2026-10-28"
+method: GET
+queryParams:
+  from_date: 2026-10-01
+  to_date: 2026-10-28
+order: 6000

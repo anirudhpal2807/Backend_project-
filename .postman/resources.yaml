@@ -1,0 +1,14 @@
+# Use this workspace to collaborate
+workspace:
+  id: ""
+
+localResources:
+  collections:
+    - ../Amrutam_Telemedicine_Platform.postman_collection.json
+    - ../Amrutam Telemedicine Platform API
+    - ../docs/api/Amrutam Telemedicine Platform API
+  environments:
+    - ../Amrutam Telemedicine - Localhost.environment.yaml
+  specs:
+    - ../openapi/openapi.json
+    - ../openapi/openapi.yaml
